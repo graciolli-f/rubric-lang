@@ -1,0 +1,52 @@
+# Expense Tracker Development Rules
+
+## Architecture Guidelines
+
+See ARCHITECTURE.md and follow its instructions. 
+
+## Best Practices
+
+### TypeScript
+- Enable strict mode
+- Define interfaces for all props
+- Use type inference when obvious
+- Avoid `any` type
+
+### React Patterns
+- Functional components only
+- Use hooks for logic reuse
+- Memoize expensive computations
+- Handle loading and error states
+
+### Code Quality
+- Descriptive variable names
+- Functions should do one thing
+- Early returns over nested conditionals
+- Comment complex business logic
+
+## File Naming
+- Components: PascalCase (ExpenseForm.tsx)
+- Services: camelCase with 'service' suffix (expenseService.ts)
+- Stores: camelCase with 'store' suffix (expenseStore.ts)
+- Types: PascalCase in types/index.ts
+
+## Performance Guidelines
+- Lazy load routes and heavy components
+- Virtualize long lists (100+ items)
+- Debounce user inputs
+- Optimize re-renders with React.memo
+
+## Security
+- Validate all user inputs
+- Sanitize data before storage
+- No sensitive data in localStorage
+- Use HTTPS for API calls (Phase 4)
+
+## Development Workflow
+1. Create types first
+2. Implement service logic
+3. Create/update store
+4. Build UI components
+5. Add error handling
+
+Remember: When in doubt, prioritize code clarity and maintainability over cleverness.
