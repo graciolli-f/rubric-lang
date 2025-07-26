@@ -1,0 +1,21 @@
+tree.txt
+# Ignore all node_modules directories anywhere in the project
+**/node_modules/
+
+# Or if you want to be more explicit:
+base-llm/*/node_modules/
+best-practices/*/node_modules/
+with-rubric/*/node_modules/
+
+# Also ignore working directories
+*/working/
+**/working/
+
+# Other common ignores
+.env
+.DS_Store
+*.log
+.idea/
+.vscode/
+dist/
+build/
