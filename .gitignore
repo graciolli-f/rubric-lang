@@ -19,3 +19,5 @@ with-rubric/*/node_modules/
 .vscode/
 dist/
 build/
+
+git-workflow.md
