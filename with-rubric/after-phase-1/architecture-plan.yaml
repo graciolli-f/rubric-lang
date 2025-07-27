@@ -1,0 +1,106 @@
+# Architecture Plan - Expense Tracker Application
+# This defines the layer structure and boundaries for the expense tracker
+
+application:
+  name: "Expense Tracker"
+  description: "React + TypeScript expense tracker with clean layered architecture"
+  
+layers:
+  services:
+    purpose: "Business logic and expense operations"
+    location: "src/services/"
+    responsibilities:
+      - "Expense validation and calculations"
+      - "Business rule enforcement"
+      - "Data transformation and formatting"
+      - "Total calculation logic"
+    constraints:
+      - "No UI framework imports"
+      - "No state management"
+      - "Pure business logic only"
+    modules:
+      - "expense-service"
+    
+  stores:
+    purpose: "State management using Zustand"
+    location: "src/stores/"
+    responsibilities:
+      - "Expense collection state management"
+      - "UI state coordination"
+      - "Service call orchestration"
+      - "Providing hooks for components"
+    constraints:
+      - "Must use Zustand"
+      - "Cannot bypass service layer"
+      - "No business calculations"
+      - "No direct data manipulation"
+    modules:
+      - "expense-store"
+    
+  ui:
+    purpose: "React components for expense tracking UI"
+    location: 
+      - "src/components/"
+      - "src/"
+    responsibilities:
+      - "Presentation logic only"
+      - "User interaction handling"
+      - "Form validation UI"
+      - "Responsive design with Tailwind"
+    constraints:
+      - "No service imports"
+      - "No business logic"
+      - "Use stores for all data"
+      - "Components under 200 lines"
+    component_categories:
+      - "components/ExpenseForm"    # Add new expense form
+      - "components/ExpenseList"    # Display all expenses
+      - "components/ExpenseItem"    # Individual expense with inline editing
+      - "App"                      # Main application component
+
+  types:
+    purpose: "Shared TypeScript interfaces and enums"
+    location: "src/types/"
+    responsibilities:
+      - "Expense interface definition"
+      - "Category enum definition"
+      - "Shared type definitions"
+    constraints:
+      - "No runtime code"
+      - "Types only"
+      - "No external dependencies"
+    modules:
+      - "index"
+
+# Allowed dependency flow (top to bottom only)
+dependency_rules:
+  - "UI → Stores"
+  - "Stores → Services"  
+  - "All layers → Types"
+  
+forbidden_patterns:
+  - "UI → Services (must go through stores)"
+  - "Services → UI (services are UI-agnostic)"
+  - "Services → Stores (services don't know about state)"
+  
+features:
+  expense_management:
+    - "Add new expense with form validation"
+    - "Edit expense inline in list"
+    - "Delete expense with confirmation"
+    - "Calculate running total"
+    - "Highlight total when > $1000"
+    - "Sort by date (newest first)"
+  
+  categories:
+    - "Food"
+    - "Transport" 
+    - "Shopping"
+    - "Bills"
+    - "Entertainment"
+    - "Other"
+
+testing_approach:
+  - "Services tested with pure function testing"
+  - "Stores tested with mocked services"
+  - "Components tested with mocked stores" 
