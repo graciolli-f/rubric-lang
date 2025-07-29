@@ -1,0 +1,49 @@
+module ExpenseStore {
+  @ "Centralized expense state management using Zustand.
+  @ Handles expense CRUD operations, persistence, and computed values.
+  @ The single source of truth for expense data in the application."
+  
+  location: "src/stores/expense-store.ts"
+  
+  interface {
+    public useExpenseStore() -> ExpenseStoreState
+    
+    @ "Store state shape returned by the hook"
+    type ExpenseStoreState = {
+      expenses: Expense[],
+      isLoading: boolean,
+      error: string?,
+      addExpense: (data: ExpenseFormData) -> Promise<void>,
+      updateExpense: (id: string, data: Partial<Expense>) -> Promise<void>,
+      deleteExpense: (id: string) -> Promise<void>,
+      getTotal: () -> number,
+      getSortedExpenses: () -> Expense[],
+      getExpenseById: (id: string) -> Expense?,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    private _expenses: Expense[]
+    private _isLoading: boolean
+    private _error: string?
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as {persist, devtools}
+    allow "../types/expense-types" as {Expense, ExpenseFormData}
+    allow "../utils/formatters" as {generateId}
+  }
+  
+  constraints {
+    deny imports ["react", "../components/*"]      @ "Stores are framework-agnostic"
+    deny imports ["../services/*", "../data/*"]    @ "No external services yet"
+    deny exports ["_*", "set", "get"]              @ "Hide internal implementation"
+    deny io.console.*                              @ "Use devtools for debugging"
+    deny io.network.*                              @ "No API calls in this version"
+    allow io.localStorage["expense-tracker-data"]  @ "Can persist to localStorage"
+    warn file.lines > 150                          @ "Consider splitting if growing"
+    deny file.lines > 200                          @ "Store too complex, must split"
+  }
+}
