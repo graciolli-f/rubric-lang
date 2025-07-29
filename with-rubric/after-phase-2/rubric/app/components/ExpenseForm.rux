@@ -1,0 +1,34 @@
+module ExpenseForm {
+  @ "Form component for adding new expenses to the tracker.
+  @ Handles form state, validation, and submission to the store.
+  @ Provides user feedback for validation errors and submission status."
+  
+  location: "src/components/ExpenseForm.tsx"
+  
+  interface {
+    public ExpenseForm() -> JSX.Element
+  }
+  
+  state {
+    private _formData: ExpenseFormData
+    private _errors: Map<string, string>
+    private _isSubmitting: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "../types/expense-types" as {ExpenseFormData, EXPENSE_CATEGORIES}
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../services/*", "../data/*"]   @ "Use store for data operations"
+    deny io.*                                      @ "No I/O in components"
+    deny exports ["_*"]                            @ "No private exports"
+    deny pattern.inline_validation_logic           @ "Use validation utilities"
+    deny pattern.complex_state_logic               @ "Keep component logic simple"
+    warn file.lines > 150                          @ "Form getting complex"
+    warn file.lines > 200                          @ "Split into smaller components"
+  }
+}

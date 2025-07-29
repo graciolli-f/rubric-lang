@@ -1,0 +1,31 @@
+module RubricValidator {
+  @ "Validation script that enforces Rubric constraints across the codebase.
+  @ Parses .rux files and validates implementation files against defined rules.
+  @ Provides clear error messages and suggestions for fixing violations."
+  
+  location: "rubric/validate.js"
+  
+  interface {
+    public class RubricValidator {
+      constructor() -> RubricValidator,
+      run() -> Promise<void>,
+      parseRuxFile(path: string) -> RuleSet,
+      validateFile(path: string, rules: RuleSet) -> Violation[]
+    }
+  }
+  
+  imports {
+    allow "fs" as node:fs
+    allow "path" as node:path
+    allow "@babel/parser" as external  @ "For AST parsing if needed"
+  }
+  
+  constraints {
+    allow io.filesystem.*              @ "Must read files to validate"
+    allow io.console.*                 @ "Must output validation results"
+    deny io.network.*                  @ "No network operations needed"
+    require exit_codes.success = 0     @ "Exit 0 on success"
+    require exit_codes.violations = 1  @ "Exit 1 on violations"
+    require exit_codes.error = 2       @ "Exit 2 on errors"
+  }
+}

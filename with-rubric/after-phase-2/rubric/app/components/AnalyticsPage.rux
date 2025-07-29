@@ -1,0 +1,29 @@
+module AnalyticsPage {
+  @ "Analytics page component that displays expense analytics and budget management.
+  @ Container component that orchestrates charts, budget display, and summary metrics.
+  @ Connects to expense store for real-time data updates."
+  
+  location: "src/components/AnalyticsPage.tsx"
+  
+  interface {
+    public AnalyticsPage() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "../stores/analytics-store" as {useAnalyticsStore}
+    allow "./PieChart" as {PieChart}
+    allow "./LineChart" as {LineChart}
+    allow "./BudgetProgress" as {BudgetProgress}
+    allow "./AnalyticsSummary" as {AnalyticsSummary}
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]      @ "Use store for data access"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.business_calculations @ "Calculations belong in store or utils"
+    warn file.lines > 150              @ "Consider splitting into smaller components"
+  }
+} 

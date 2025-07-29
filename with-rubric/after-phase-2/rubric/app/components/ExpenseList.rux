@@ -1,0 +1,30 @@
+module ExpenseList {
+  @ "Container component that displays the list of expenses and totals.
+  @ Orchestrates ExpenseItem components and shows summary information.
+  @ Handles empty states and budget warnings."
+  
+  location: "src/components/ExpenseList.tsx"
+  
+  interface {
+    public ExpenseList() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "./ExpenseItem" as {ExpenseItem}
+    allow "./ExpenseItemEdit" as {ExpenseItemEdit}
+    allow "./ConfirmDialog" as {ConfirmDialog}
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../types/*"]                    @ "Get types through store interface"
+    deny imports ["../services/*", "../data/*"]    @ "Use store for data access"
+    deny io.*                                      @ "No I/O in components"
+    deny pattern.business_calculations             @ "Calculations belong in store"
+    deny pattern.complex_filtering                 @ "Filtering logic belongs in store"
+    warn file.lines > 100                          @ "List component growing"
+    warn file.lines > 150                          @ "Too complex, extract summary component"
+  }
+}

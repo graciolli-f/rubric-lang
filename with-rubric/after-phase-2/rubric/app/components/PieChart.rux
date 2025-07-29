@@ -1,0 +1,28 @@
+module PieChart {
+  @ "Pie chart component that displays expense breakdown by category.
+  @ Pure visualization component using Recharts library.
+  @ Receives processed data via props, no direct store access."
+  
+  location: "src/components/PieChart.tsx"
+  
+  interface {
+    public PieChart(props: {
+      data: Array<{category: string, amount: number, percentage: number}>,
+      title?: string
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "recharts" as external
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]       @ "Pure component, data via props"
+    deny imports ["../services/*"]     @ "No business logic"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.data_fetching         @ "Data should come via props"
+    warn file.lines > 120              @ "Chart component getting complex"
+  }
+} 
