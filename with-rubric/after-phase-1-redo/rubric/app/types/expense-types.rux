@@ -1,0 +1,43 @@
+module ExpenseTypes {
+  @ "Core type definitions for the expense tracking domain.
+  @ Provides TypeScript types, constants, and type guards.
+  @ Pure module with no dependencies, no logic beyond type validation."
+  
+  location: "src/types/expense-types.ts"
+  
+  interface {
+    public type Expense = {
+      id: string,
+      amount: number,
+      category: ExpenseCategory,
+      date: string,
+      description: string,
+      createdAt: string,
+      updatedAt?: string
+    }
+    
+    public type ExpenseFormData = {
+      amount: string,
+      category: ExpenseCategory,
+      date: string,
+      description: string
+    }
+    
+    public type ExpenseCategory = "Food" | "Transport" | "Shopping" | "Bills" | "Entertainment" | "Other"
+    
+    public const EXPENSE_CATEGORIES: readonly ExpenseCategory[]
+    public isValidCategory(value: unknown) -> boolean
+    public isValidExpense(value: unknown) -> boolean
+  }
+  
+  imports {
+    deny imports.*  @ "Type modules must have zero dependencies"
+  }
+  
+  constraints {
+    deny io.*                     @ "No I/O in type definitions"
+    deny exports ["_*"]           @ "No private exports"
+    deny file.lines > 100         @ "Keep types focused"
+    deny pattern.business_logic   @ "Only type definitions and guards"
+  }
+}

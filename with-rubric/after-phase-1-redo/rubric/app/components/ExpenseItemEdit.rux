@@ -1,0 +1,34 @@
+module ExpenseItemEdit {
+  @ "Edit form component for modifying existing expenses.
+  @ Separate from ExpenseItem to maintain single responsibility.
+  @ Handles edit state and validation before submitting to store."
+  
+  location: "src/components/ExpenseItemEdit.tsx"
+  
+  interface {
+    public ExpenseItemEdit(props: {
+      expense: Expense,
+      onSave: (updates: Partial<Expense>) -> void,
+      onCancel: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _editData: Partial<Expense>
+    private _errors: Map<string, string>
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/expense-types" as {Expense, EXPENSE_CATEGORIES}
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]                   @ "Props-only for reusability"
+    deny io.*                                      @ "No I/O in components"
+    deny pattern.complex_validation                @ "Extract validation if complex"
+    warn file.lines > 150                          @ "Edit form getting complex"
+    warn file.lines > 200                          @ "Must split into smaller parts"
+  }
+}

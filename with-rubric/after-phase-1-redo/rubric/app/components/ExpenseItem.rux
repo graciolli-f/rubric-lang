@@ -1,0 +1,31 @@
+module ExpenseItem {
+  @ "Display component for individual expense items.
+  @ Shows expense details with actions to edit or delete.
+  @ Delegates all state changes to parent components or store."
+  
+  location: "src/components/ExpenseItem.tsx"
+  
+  interface {
+    public ExpenseItem(props: {
+      expense: Expense,
+      onEdit: () -> void,
+      onDelete: () -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/expense-types" as {Expense}
+    allow "../utils/formatters" as {formatCurrency, formatDate}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]                   @ "Props-only component"
+    deny imports ["./ExpenseItemEdit"]             @ "No coupling to edit component"
+    deny io.*                                      @ "No I/O in display components"
+    deny pattern.inline_editing                    @ "Editing is separate concern"
+    deny pattern.modal_in_list_item               @ "Modals belong at app level"
+    deny state.complex                            @ "Display components should be simple"
+    warn file.lines > 100                         @ "Keep display components small"
+  }
+}
