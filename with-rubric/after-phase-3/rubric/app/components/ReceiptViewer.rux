@@ -1,0 +1,46 @@
+module ReceiptViewer {
+  @ "Receipt display component with thumbnail and full-size view"
+  @ "Shows receipt thumbnails in lists and full-size modal on click"
+  
+  location: "src/components/ReceiptViewer.tsx"
+  
+  interface {
+    @ "Receipt viewer component"
+    public ReceiptViewer(props: {
+      receipt: {base64: string, fileName: string, fileSize: number},
+      showThumbnail?: boolean,
+      onRemove?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Component state"
+    private _isModalOpen: boolean
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+    
+    @ "Internal components"
+    allow "./ConfirmDialog" as {ConfirmDialog}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "Pattern requirements"
+    require pattern.focus_trap  @ "Must trap focus in modal"
+    require pattern.escape_key  @ "Must handle escape key"
+    
+    @ "File constraints"
+    warn file.lines > 120  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 

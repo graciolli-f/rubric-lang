@@ -1,0 +1,34 @@
+module AnalyticsStore {
+  @ "Analytics store that manages budget and analytics calculations.
+  @ Handles budget settings, analytics data generation, and derived metrics.
+  @ Keeps analytics logic separate from core expense operations."
+  
+  location: "src/stores/analytics-store.ts"
+  
+  interface {
+    public useAnalyticsStore() -> {
+      budget: Budget | null,
+      setBudget: (data: BudgetFormData) -> Promise<void>,
+      getCurrentMonthTotal: (expenses: Expense[]) -> number,
+      getAnalyticsData: (expenses: Expense[]) -> AnalyticsData,
+      getRemainingBudget: (expenses: Expense[]) -> number,
+      isLoading: boolean,
+      error: string | null,
+      clearError: () -> void
+    }
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../types/expense-types" as {Budget, BudgetFormData, AnalyticsData, Expense}
+  }
+  
+  constraints {
+    deny imports ["../components/*"]    @ "Store should not import UI components"
+    deny imports ["../services/*"]      @ "Keep services separate"
+    deny io.console.*                  @ "No console logging in production store"
+    warn file.lines > 150              @ "Analytics store getting large"
+    deny file.lines > 200              @ "Must split if over 200 lines"
+  }
+} 

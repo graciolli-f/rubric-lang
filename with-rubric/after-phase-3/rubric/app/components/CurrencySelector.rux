@@ -1,0 +1,38 @@
+module CurrencySelector {
+  @ "Currency selection dropdown component"
+  @ "Allows selection from supported currencies (USD, EUR, GBP)"
+  
+  location: "src/components/CurrencySelector.tsx"
+  
+  interface {
+    @ "Currency selector component"
+    public CurrencySelector(props: {
+      value: Currency,
+      onChange: (currency: Currency) -> void,
+      label?: string,
+      error?: string
+    }) -> JSX.Element
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+    
+    @ "Internal types"
+    allow "../types/currency-types" as {Currency, CURRENCIES}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 60  @ "Getting large, consider splitting"
+    deny file.lines > 80  @ "Too large, must split"
+  }
+} 

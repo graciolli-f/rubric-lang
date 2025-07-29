@@ -1,0 +1,38 @@
+module ReceiptService {
+  @ "Handles receipt image processing and validation"
+  @ "Converts images to base64 and validates file types/sizes"
+  
+  location: "src/services/receipt-service.ts"
+  
+  interface {
+    @ "Public API for receipt operations"
+    public processReceiptFile(file: File) -> Promise<{base64: string, fileName: string, fileSize: number}>
+    public validateReceiptFile(file: File) -> boolean
+    public createThumbnail(base64: string, maxWidth: number, maxHeight: number) -> string
+    public getFileExtension(fileName: string) -> string
+  }
+  
+  state {
+    @ "Private service state"
+    private _maxFileSize: number
+    private _allowedTypes: string[]
+  }
+  
+  imports {
+    @ "No external dependencies needed for file processing"
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 100  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 
