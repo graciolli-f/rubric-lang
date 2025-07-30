@@ -1,0 +1,46 @@
+module AuthService {
+  @ "Handles authentication API calls and user management"
+  @ "Simulates backend authentication for demo purposes"
+  
+  location: "src/services/auth-service.ts"
+  
+  interface {
+    @ "Public API - authentication operations"
+    public authService: {
+      login: (data: LoginFormData) -> Promise<UserSession>,
+      signup: (data: SignupFormData) -> Promise<UserSession>,
+      logout: () -> Promise<void>,
+      getCurrentUser: () -> Promise<User?>,
+      updateProfile: (userId: string, data: Partial<User>) -> Promise<User>,
+      validateSession: (token: string) -> Promise<boolean>
+    }
+  }
+  
+  state {
+    @ "Private implementation details"
+    private _mockUsers: User[]
+    private _sessions: Map<string, UserSession>
+  }
+  
+  imports {
+    @ "Internal imports"
+    allow "../types/user-types" as {User, UserSession, LoginFormData, SignupFormData}
+    allow "../utils/formatters" as {generateId}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.localStorage["mock-users"]    @ "Can persist mock users"
+    allow io.localStorage["mock-sessions"] @ "Can persist mock sessions"
+    deny io.console.*                      @ "No console logging"
+    deny io.network.*                      @ "Mock service - no real network calls"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                    @ "No private members"
+    allow exports ["authService"]          @ "Main service export"
+    
+    @ "File constraints"
+    warn file.lines > 200                 @ "Getting large, consider splitting"
+    deny file.lines > 350                 @ "Too large, must split"
+  }
+} 

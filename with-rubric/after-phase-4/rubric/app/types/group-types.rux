@@ -1,0 +1,72 @@
+module GroupTypes {
+  @ "Type definitions for expense groups and collaboration"
+  @ "Includes ExpenseGroup, GroupMember, and group invitation types"
+  
+  location: "src/types/group-types.ts"
+  
+  interface {
+    @ "Public API - exported types and validators"
+    public type ExpenseGroup = {
+      id: string,
+      name: string,
+      description?: string,
+      createdBy: string,
+      createdAt: string,
+      updatedAt?: string,
+      members: GroupMember[]
+    }
+    
+    public type GroupMember = {
+      userId: string,
+      role: GroupRole,
+      joinedAt: string,
+      invitedBy: string
+    }
+    
+    public type GroupRole = "member" | "admin"
+    
+    public type GroupInvitation = {
+      id: string,
+      groupId: string,
+      email: string,
+      role: GroupRole,
+      invitedBy: string,
+      createdAt: string,
+      expiresAt: string,
+      status: InvitationStatus
+    }
+    
+    public type InvitationStatus = "pending" | "accepted" | "declined" | "expired"
+    
+    public type GroupFormData = {
+      name: string,
+      description?: string
+    }
+    
+    public type InviteFormData = {
+      email: string,
+      role: GroupRole
+    }
+    
+    public GROUP_ROLES: readonly GroupRole[]
+    public INVITATION_STATUSES: readonly InvitationStatus[]
+    public isValidExpenseGroup(value: unknown) -> boolean
+    public isValidGroupRole(value: unknown) -> boolean
+    public isValidInvitationStatus(value: unknown) -> boolean
+  }
+  
+  imports {
+    @ "No imports allowed - pure type definitions"
+    deny imports.*
+  }
+  
+  constraints {
+    @ "Type module constraints"
+    deny io.*                  @ "No I/O operations"
+    deny exports ["_*"]        @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 120     @ "Consider splitting if getting large"
+    deny file.lines > 250     @ "Too large, must split"
+  }
+} 

@@ -1,0 +1,46 @@
+module ExportButton {
+  @ "Export to CSV button with options dialog"
+  @ "Provides CSV export functionality with date range and filter options"
+  
+  location: "src/components/ExportButton.tsx"
+  
+  interface {
+    @ "Export button component"
+    public ExportButton(props: {
+      expenses: Expense[],
+      disabled?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Component state"
+    private _isDialogOpen: boolean
+    private _exportOptions: ExportOptions
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+    
+    @ "Internal types"
+    allow "../types/expense-types" as {Expense, ExportOptions, ExpenseCategory}
+    allow "../services/export-service" as {exportExpensesToCSV}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "Pattern requirements"
+    require pattern.escape_key  @ "Must handle escape key in dialog"
+    
+    @ "File constraints"
+    warn file.lines > 150  @ "Getting large, consider splitting"
+    deny file.lines > 220  @ "Too large, must split"
+  }
+} 

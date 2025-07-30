@@ -1,0 +1,26 @@
+module Navigation {
+  @ "Navigation component that provides tabs to switch between expenses list and analytics views.
+  @ Manages active view state and provides consistent navigation interface.
+  @ Simple stateless component with callback props for view switching."
+  
+  location: "src/components/Navigation.tsx"
+  
+  interface {
+    public Navigation(props: {
+      activeView: "expenses" | "analytics",
+      onViewChange: (view: "expenses" | "analytics") -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]       @ "Navigation should be stateless"
+    deny imports ["../services/*"]     @ "No business logic in navigation"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.inline_styles         @ "Use CSS classes"
+    warn file.lines > 80               @ "Keep navigation simple"
+  }
+} 

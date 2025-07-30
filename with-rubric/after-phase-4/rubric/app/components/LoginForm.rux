@@ -1,0 +1,46 @@
+module LoginForm {
+  @ "User login form component"
+  @ "Handles user authentication with email and password"
+  
+  location: "src/components/LoginForm.tsx"
+  
+  interface {
+    @ "Public API - React component"
+    public LoginForm(props: {
+      onSuccess?: () -> void,
+      onSwitchToSignup?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Private component state"
+    private _formData: LoginFormData
+    private _isSubmitting: boolean
+    private _validationErrors: Record<string, string>
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as {useState}
+    
+    @ "Internal imports"
+    allow "../types/user-types" as {LoginFormData}
+    allow "../stores/auth-store" as {useAuthStore}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.*                              @ "No direct I/O - use store"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                    @ "No private members"
+    
+    @ "Pattern requirements"
+    require pattern.focus_trap             @ "Must trap focus for accessibility"
+    require pattern.escape_key             @ "Must handle escape key"
+    
+    @ "File constraints"
+    warn file.lines > 120                  @ "Getting large, consider splitting"
+    deny file.lines > 200                  @ "Too large, must split"
+  }
+} 

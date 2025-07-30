@@ -1,0 +1,55 @@
+module ApprovalTypes {
+  @ "Type definitions for expense approval workflow"
+  @ "Includes approval requests, status tracking, and manager actions"
+  
+  location: "src/types/approval-types.ts"
+  
+  interface {
+    @ "Public API - exported types and validators"
+    public type ApprovalStatus = "pending" | "approved" | "rejected"
+    
+    public type ApprovalRequest = {
+      id: string,
+      expenseId: string,
+      requestedBy: string,
+      requestedAt: string,
+      reason?: string,
+      status: ApprovalStatus,
+      reviewedBy?: string,
+      reviewedAt?: string,
+      reviewComments?: string
+    }
+    
+    public type ApprovalAction = {
+      action: "approve" | "reject",
+      comments?: string
+    }
+    
+    public type ExpenseApprovalInfo = {
+      isRequired: boolean,
+      threshold: number,
+      request?: ApprovalRequest
+    }
+    
+    public APPROVAL_STATUSES: readonly ApprovalStatus[]
+    public APPROVAL_THRESHOLD: 500
+    public isValidApprovalStatus(value: unknown) -> boolean
+    public requiresApproval(amount: number) -> boolean
+    public isValidApprovalRequest(value: unknown) -> boolean
+  }
+  
+  imports {
+    @ "No imports allowed - pure type definitions"
+    deny imports.*
+  }
+  
+  constraints {
+    @ "Type module constraints"
+    deny io.*                  @ "No I/O operations"
+    deny exports ["_*"]        @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 100     @ "Consider splitting if getting large"
+    deny file.lines > 200     @ "Too large, must split"
+  }
+} 

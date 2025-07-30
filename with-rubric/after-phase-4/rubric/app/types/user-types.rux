@@ -1,0 +1,58 @@
+module UserTypes {
+  @ "Type definitions for user authentication and authorization"
+  @ "Includes User, UserSession, and authentication-related types"
+  
+  location: "src/types/user-types.ts"
+  
+  interface {
+    @ "Public API - exported types and validators"
+    public type User = {
+      id: string,
+      name: string,
+      email: string,
+      role: UserRole,
+      avatar?: string,
+      createdAt: string,
+      lastLoginAt?: string
+    }
+    
+    public type UserRole = "user" | "manager" | "admin"
+    
+    public type UserSession = {
+      user: User,
+      token: string,
+      expiresAt: string
+    }
+    
+    public type LoginFormData = {
+      email: string,
+      password: string
+    }
+    
+    public type SignupFormData = {
+      name: string,
+      email: string,
+      password: string,
+      confirmPassword: string
+    }
+    
+    public USER_ROLES: readonly UserRole[]
+    public isValidUser(value: unknown) -> boolean
+    public isValidUserRole(value: unknown) -> boolean
+  }
+  
+  imports {
+    @ "No imports allowed - pure type definitions"
+    deny imports.*
+  }
+  
+  constraints {
+    @ "Type module constraints"
+    deny io.*                  @ "No I/O operations"
+    deny exports ["_*"]        @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 100     @ "Consider splitting if getting large"
+    deny file.lines > 200     @ "Too large, must split"
+  }
+} 

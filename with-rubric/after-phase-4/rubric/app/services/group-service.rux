@@ -1,0 +1,48 @@
+module GroupService {
+  @ "Handles expense group API calls and member management"
+  @ "Simulates backend group operations for demo purposes"
+  
+  location: "src/services/group-service.ts"
+  
+  interface {
+    @ "Public API - group operations"
+    public groupService: {
+      createGroup: (data: GroupFormData, createdBy: string) -> Promise<ExpenseGroup>,
+      updateGroup: (id: string, data: Partial<ExpenseGroup>) -> Promise<ExpenseGroup>,
+      deleteGroup: (id: string) -> Promise<void>,
+      getUserGroups: (userId: string) -> Promise<ExpenseGroup[]>,
+      getGroupById: (id: string) -> Promise<ExpenseGroup?>,
+      inviteMember: (groupId: string, data: InviteFormData, invitedBy: string) -> Promise<GroupInvitation>,
+      removeMember: (groupId: string, userId: string) -> Promise<void>,
+      getInvitations: (userId: string) -> Promise<GroupInvitation[]>
+    }
+  }
+  
+  state {
+    @ "Private implementation details"
+    private _mockGroups: ExpenseGroup[]
+    private _mockInvitations: GroupInvitation[]
+  }
+  
+  imports {
+    @ "Internal imports"
+    allow "../types/group-types" as {ExpenseGroup, GroupInvitation, GroupFormData, InviteFormData}
+    allow "../utils/formatters" as {generateId}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.localStorage["mock-groups"]       @ "Can persist mock groups"
+    allow io.localStorage["mock-invitations"] @ "Can persist mock invitations"
+    deny io.console.*                          @ "No console logging"
+    deny io.network.*                          @ "Mock service - no real network calls"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                        @ "No private members"
+    allow exports ["groupService"]             @ "Main service export"
+    
+    @ "File constraints"
+    warn file.lines > 250                     @ "Getting large, consider splitting"
+    deny file.lines > 400                     @ "Too large, must split"
+  }
+} 

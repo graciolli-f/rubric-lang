@@ -1,0 +1,39 @@
+module RecurringService {
+  @ "Handles creation and generation of recurring expenses"
+  @ "Generates future expense instances based on frequency settings"
+  
+  location: "src/services/recurring-service.ts"
+  
+  interface {
+    @ "Public API for recurring expense operations"
+    public generateRecurringExpenses(expense: Expense) -> Expense[]
+    public getNextRecurringDate(expense: Expense) -> string
+    public shouldGenerateRecurring(expense: Expense) -> boolean
+    public createRecurringInstance(parentExpense: Expense, date: string) -> Expense
+  }
+  
+  state {
+    @ "Private service state"
+    private _maxFutureInstances: number
+  }
+  
+  imports {
+    @ "Internal types"
+    allow "../types/expense-types" as {Expense, RecurringFrequency}
+    allow "../utils/formatters" as {generateId}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 100  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 

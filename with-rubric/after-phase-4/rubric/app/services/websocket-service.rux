@@ -1,0 +1,46 @@
+module WebSocketService {
+  @ "Manages WebSocket connections and real-time messaging"
+  @ "Simulates real-time updates for demo purposes"
+  
+  location: "src/services/websocket-service.ts"
+  
+  interface {
+    @ "Public API - WebSocket operations"
+    public webSocketService: {
+      connect: (userId: string) -> void,
+      disconnect: () -> void,
+      send: (message: WebSocketMessage) -> void,
+      subscribe: (callback: (message: WebSocketMessage) -> void) -> () -> void,
+      isConnected: () -> boolean,
+      simulateMessage: (message: WebSocketMessage) -> void
+    }
+  }
+  
+  state {
+    @ "Private implementation details"
+    private _isConnected: boolean
+    private _subscribers: Set<Function>
+    private _userId: string?
+    private _simulationTimer: any?
+  }
+  
+  imports {
+    @ "Internal imports"
+    allow "../types/realtime-types" as {WebSocketMessage, WebSocketMessageType}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.localStorage.*                     @ "No persistence needed"
+    deny io.console.*                          @ "No console logging"
+    allow io.network.*                         @ "WebSocket connections allowed"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                        @ "No private members"
+    allow exports ["webSocketService"]         @ "Main service export"
+    
+    @ "File constraints"
+    warn file.lines > 150                     @ "Getting large, consider splitting"
+    deny file.lines > 250                     @ "Too large, must split"
+  }
+} 

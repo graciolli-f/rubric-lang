@@ -1,0 +1,39 @@
+module ExportService {
+  @ "Handles CSV export of expense data with filtering options"
+  @ "Generates downloadable CSV files with expense data"
+  
+  location: "src/services/export-service.ts"
+  
+  interface {
+    @ "Public API for export operations"
+    public exportExpensesToCSV(expenses: Expense[], options: ExportOptions) -> void
+    public filterExpensesByDateRange(expenses: Expense[], startDate?: string, endDate?: string) -> Expense[]
+    public generateCSVContent(expenses: Expense[], includeTags: boolean) -> string
+    public downloadCSV(content: string, filename: string) -> void
+  }
+  
+  state {
+    @ "Private service state"
+    private _csvHeaders: string[]
+  }
+  
+  imports {
+    @ "Internal types"
+    allow "../types/expense-types" as {Expense, ExportOptions}
+    allow "../utils/formatters" as {formatDate}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 120  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 

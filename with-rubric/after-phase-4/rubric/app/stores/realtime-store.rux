@@ -1,0 +1,60 @@
+module RealtimeStore {
+  @ "Manages real-time collaboration state and WebSocket connections"
+  @ "Handles presence, live editing, and activity updates"
+  
+  location: "src/stores/realtime-store.ts"
+  
+  interface {
+    @ "Public API - Zustand store interface"
+    public useRealtimeStore() -> {
+      isConnected: boolean,
+      presenceUsers: PresenceUser[],
+      editingStates: EditingState[],
+      activities: ActivityEvent[],
+      optimisticUpdates: OptimisticUpdate[],
+      connect: (userId: string) -> void,
+      disconnect: () -> void,
+      updatePresence: (data: Partial<PresenceUser>) -> void,
+      startEditing: (expenseId: string) -> void,
+      stopEditing: (expenseId: string) -> void,
+      addActivity: (activity: ActivityEvent) -> void,
+      addOptimisticUpdate: (update: OptimisticUpdate) -> void,
+      removeOptimisticUpdate: (id: string) -> void,
+      clearActivities: () -> void
+    }
+  }
+  
+  state {
+    @ "Private store state"
+    private _isConnected: boolean
+    private _presenceUsers: PresenceUser[]
+    private _editingStates: EditingState[]
+    private _activities: ActivityEvent[]
+    private _optimisticUpdates: OptimisticUpdate[]
+    private _currentUserId: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "zustand" as {create}
+    allow "zustand/middleware" as {devtools}
+    
+    @ "Internal imports"
+    allow "../types/realtime-types" as {PresenceUser, EditingState, ActivityEvent, OptimisticUpdate}
+    allow "../services/websocket-service" as {webSocketService}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.localStorage.*                 @ "No persistence for real-time state"
+    deny io.console.*                      @ "No console logging"
+    allow io.network.*                     @ "WebSocket connections allowed"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                    @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 180                 @ "Getting large, consider splitting"
+    deny file.lines > 300                 @ "Too large, must split"
+  }
+} 

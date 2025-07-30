@@ -1,0 +1,60 @@
+module GroupStore {
+  @ "Manages expense groups and group memberships"
+  @ "Handles group creation, invitations, and member management"
+  
+  location: "src/stores/group-store.ts"
+  
+  interface {
+    @ "Public API - Zustand store interface"
+    public useGroupStore() -> {
+      groups: ExpenseGroup[],
+      currentGroupId: string?,
+      invitations: GroupInvitation[],
+      isLoading: boolean,
+      error: string?,
+      createGroup: (data: GroupFormData) -> Promise<void>,
+      updateGroup: (id: string, data: Partial<ExpenseGroup>) -> Promise<void>,
+      deleteGroup: (id: string) -> Promise<void>,
+      inviteMember: (groupId: string, data: InviteFormData) -> Promise<void>,
+      removeMember: (groupId: string, userId: string) -> Promise<void>,
+      setCurrentGroup: (groupId: string?) -> void,
+      getUserGroups: (userId: string) -> ExpenseGroup[],
+      getGroupById: (id: string) -> ExpenseGroup?,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    @ "Private store state"
+    private _groups: ExpenseGroup[]
+    private _currentGroupId: string?
+    private _invitations: GroupInvitation[]
+    private _isLoading: boolean
+    private _error: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "zustand" as {create}
+    allow "zustand/middleware" as {persist, devtools}
+    
+    @ "Internal imports"
+    allow "../types/group-types" as {ExpenseGroup, GroupInvitation, GroupFormData, InviteFormData}
+    allow "../utils/formatters" as {generateId}
+    allow "../services/group-service" as {groupService}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.localStorage["group-data"]    @ "Can persist group state"
+    deny io.console.*                      @ "No console logging"
+    deny io.network.*                      @ "Group service handles network"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                    @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 200                 @ "Getting large, consider splitting"
+    deny file.lines > 350                 @ "Too large, must split"
+  }
+} 

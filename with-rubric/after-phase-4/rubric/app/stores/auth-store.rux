@@ -1,0 +1,55 @@
+module AuthStore {
+  @ "Manages user authentication state and operations"
+  @ "Handles login, signup, logout, and current user session"
+  
+  location: "src/stores/auth-store.ts"
+  
+  interface {
+    @ "Public API - Zustand store interface"
+    public useAuthStore() -> {
+      currentUser: User?,
+      session: UserSession?,
+      isAuthenticated: boolean,
+      isLoading: boolean,
+      error: string?,
+      login: (data: LoginFormData) -> Promise<void>,
+      signup: (data: SignupFormData) -> Promise<void>,
+      logout: () -> void,
+      clearError: () -> void,
+      updateProfile: (data: Partial<User>) -> Promise<void>
+    }
+  }
+  
+  state {
+    @ "Private store state"
+    private _currentUser: User?
+    private _session: UserSession?
+    private _isLoading: boolean
+    private _error: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "zustand" as {create}
+    allow "zustand/middleware" as {persist, devtools}
+    
+    @ "Internal imports"
+    allow "../types/user-types" as {User, UserSession, LoginFormData, SignupFormData}
+    allow "../utils/formatters" as {generateId}
+    allow "../services/auth-service" as {authService}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.localStorage["auth-data"]  @ "Can persist auth state"
+    deny io.console.*                   @ "No console logging"
+    deny io.network.*                   @ "Auth service handles network"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                 @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 150              @ "Getting large, consider splitting"
+    deny file.lines > 250              @ "Too large, must split"
+  }
+} 

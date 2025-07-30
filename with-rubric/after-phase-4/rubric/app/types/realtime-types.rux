@@ -1,0 +1,79 @@
+module RealtimeTypes {
+  @ "Type definitions for real-time collaboration features"
+  @ "Includes WebSocket events, presence indicators, and live editing"
+  
+  location: "src/types/realtime-types.ts"
+  
+  interface {
+    @ "Public API - exported types and validators"
+    public type PresenceUser = {
+      userId: string,
+      name: string,
+      avatar?: string,
+      lastSeen: string,
+      currentView?: string
+    }
+    
+    public type EditingState = {
+      expenseId: string,
+      userId: string,
+      userName: string,
+      startedAt: string
+    }
+    
+    public type WebSocketMessage = {
+      type: WebSocketMessageType,
+      payload: any,
+      timestamp: string,
+      userId?: string
+    }
+    
+    public type WebSocketMessageType = 
+      "presence_update" | "expense_created" | "expense_updated" | 
+      "expense_deleted" | "editing_started" | "editing_stopped" |
+      "approval_request" | "approval_decision" | "activity_created"
+    
+    public type ActivityEvent = {
+      id: string,
+      type: ActivityType,
+      userId: string,
+      userName: string,
+      timestamp: string,
+      groupId?: string,
+      data: any
+    }
+    
+    public type ActivityType = 
+      "expense_created" | "expense_updated" | "expense_deleted" |
+      "expense_approved" | "expense_rejected" | "group_created" |
+      "member_added" | "member_removed"
+    
+    public type OptimisticUpdate = {
+      id: string,
+      type: "create" | "update" | "delete",
+      entityType: "expense" | "group" | "approval",
+      timestamp: string,
+      data: any
+    }
+    
+    public WEBSOCKET_MESSAGE_TYPES: readonly WebSocketMessageType[]
+    public ACTIVITY_TYPES: readonly ActivityType[]
+    public isValidWebSocketMessage(value: unknown) -> boolean
+    public isValidActivityEvent(value: unknown) -> boolean
+  }
+  
+  imports {
+    @ "No imports allowed - pure type definitions"
+    deny imports.*
+  }
+  
+  constraints {
+    @ "Type module constraints"
+    deny io.*                  @ "No I/O operations"
+    deny exports ["_*"]        @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 150     @ "Consider splitting if getting large"
+    deny file.lines > 300     @ "Too large, must split"
+  }
+} 

@@ -1,0 +1,40 @@
+module AuthPage {
+  @ "Authentication page with login and signup forms"
+  @ "Container component that manages auth flow"
+  
+  location: "src/components/AuthPage.tsx"
+  
+  interface {
+    @ "Public API - React component"
+    public AuthPage() -> JSX.Element
+  }
+  
+  state {
+    @ "Private component state"
+    private _currentView: "login" | "signup"
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as {useState}
+    
+    @ "Internal imports"
+    allow "./LoginForm" as {LoginForm}
+    allow "../stores/auth-store" as {useAuthStore}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.*                              @ "No direct I/O - use store"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]                    @ "No private members"
+    
+    @ "Container component permissions"
+    allow imports ["./LoginForm"]          @ "Can import related components"
+    
+    @ "File constraints"
+    warn file.lines > 100                  @ "Getting large, consider splitting"
+    deny file.lines > 180                  @ "Too large, must split"
+  }
+} 
