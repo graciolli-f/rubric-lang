@@ -1,0 +1,11 @@
+**MANDATORY RUBRIC COMPLIANCE:** 
+Before creating ANY new file in src/, you MUST first create the corresponding .rux constraint file in rubric/app/[matching-path]/. NO EXCEPTIONS. If you create code without first creating the .rux file, you are violating the architectural law of this project.**
+
+**MANDATORY WORKFLOW:**
+1. BEFORE writing ANY code: Create .rux file in rubric/app/[path]/
+2. Plan code to fit .rux constraints  
+3. Write code following .rux spec
+4. Run: node validate.js
+5. Fix violations (change code, not .rux)
+
+**If you create ANY source file without its .rux file first, you have FAILED.**

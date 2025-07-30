@@ -1,0 +1,28 @@
+module Formatters {
+  @ "Pure utility functions for formatting dates, currency, and other values.
+  @ Centralized formatting logic to ensure consistency across the app.
+  @ No side effects, no dependencies on application state."
+  
+  location: "src/utils/formatters.ts"
+  
+  interface {
+    public formatCurrency(amount: number) -> string
+    public formatDate(date: string | Date) -> string
+    public formatDateISO(date: string | Date) -> string
+    public generateId() -> string
+    public truncateText(text: string, maxLength: number) -> string
+  }
+  
+  imports {
+    deny imports.*  @ "Pure utilities should have no dependencies"
+  }
+  
+  constraints {
+    deny io.*                           @ "Formatters must be pure functions"
+    deny exports ["_*"]                 @ "No private exports"
+    deny pattern.stateful_functions     @ "All functions must be pure"
+    deny pattern.date_mutation          @ "Don't mutate date objects"
+    require tests.unit_tests            @ "Utilities must have tests"
+    deny file.lines > 200               @ "Split into multiple util modules if needed"
+  }
+}

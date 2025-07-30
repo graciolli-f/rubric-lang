@@ -1,0 +1,48 @@
+module WebSocketService {
+  @ "WebSocket service for real-time communication and collaboration features.
+  @ Manages WebSocket connections, message routing, and connection state.
+  @ Provides reliable real-time updates with automatic reconnection."
+
+  type: "service"
+  
+  location: "src/services/websocket-service.ts"
+  
+  interface {
+    public connect(userId: string, token: string) -> Promise<void>
+    public disconnect() -> void
+    public send(message: WebSocketMessage) -> void
+    public subscribe(eventType: MessageType, callback: (data: any) -> void) -> () -> void
+    public joinGroup(groupId: string) -> void
+    public leaveGroup(groupId: string) -> void
+    public updatePresence(status: Partial<PresenceUser>) -> void
+    public getConnectionState() -> "connecting" | "connected" | "disconnected" | "reconnecting"
+    public isConnected() -> boolean
+  }
+  
+  state {
+    private _ws: WebSocket | null
+    private _userId: string | null
+    private _connectionState: string
+    private _subscriptions: Map<MessageType, Function[]>
+    private _reconnectAttempts: number
+    private _reconnectTimer: NodeJS.Timeout | null
+    private _heartbeatTimer: NodeJS.Timeout | null
+  }
+  
+  imports {
+    allow "ws" as external
+    allow "../types/realtime-types" as {WebSocketMessage, MessageType, PresenceUser}
+    allow "../utils/retry" as {exponentialBackoff}
+  }
+  
+  constraints {
+    allow io.network.websocket["ws://localhost:*", "wss://*"]  @ "Can create WebSocket connections"
+    deny io.localStorage.*                                     @ "Use auth service for token storage"
+    deny io.console.*                                          @ "No console logging"
+    deny exports ["_*"]                                        @ "No private exports"
+    require pattern.reconnection_logic                         @ "Must handle connection drops"
+    require pattern.heartbeat                                  @ "Must implement heartbeat/ping"
+    require pattern.error_handling                             @ "Must handle WebSocket errors"
+    warn file.lines > 250                                      @ "WebSocket logic getting complex"
+  }
+} 

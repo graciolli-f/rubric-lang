@@ -1,0 +1,44 @@
+module NotificationService {
+  @ "Notification service for approval workflows and activity alerts.
+  @ Handles email notifications, in-app notifications, and notification preferences.
+  @ Provides reliable notification delivery with proper formatting."
+
+  type: "service"
+  
+  location: "src/services/notification-service.ts"
+  
+  interface {
+    public sendApprovalRequest(request: ApprovalRequest, approvers: User[]) -> Promise<void>
+    public sendApprovalDecision(request: ApprovalRequest, decision: ApprovalAction) -> Promise<void>
+    public sendGroupInvitation(invitation: GroupInvitation, inviter: User) -> Promise<void>
+    public sendActivityNotification(event: ActivityEvent, recipients: User[]) -> Promise<void>
+    public markNotificationRead(notificationId: string) -> Promise<void>
+    public getUnreadCount(userId: string) -> Promise<number>
+    public getUserNotifications(userId: string, limit?: number) -> Promise<ApprovalNotification[]>
+    public updateNotificationPreferences(userId: string, preferences: any) -> Promise<void>
+  }
+  
+  state {
+    private _emailTemplates: Map<string, string>
+    private _defaultPreferences: any
+  }
+  
+  imports {
+    allow "../types/approval-types" as {ApprovalRequest, ApprovalAction, ApprovalNotification}
+    allow "../types/group-types" as {GroupInvitation}
+    allow "../types/user-types" as {User}
+    allow "../types/realtime-types" as {ActivityEvent}
+    allow "../utils/email-templates" as {renderTemplate}
+  }
+  
+  constraints {
+    allow io.network.fetch["/api/notifications/*", "/api/email/*"]  @ "Can send notifications via API"
+    deny io.localStorage.*                                          @ "No local storage in service"
+    deny io.console.*                                               @ "No console logging"
+    deny exports ["_*"]                                             @ "No private exports"
+    require pattern.template_validation                             @ "Must validate email templates"
+    require pattern.error_handling                                  @ "Must handle notification failures"
+    require pattern.rate_limiting                                   @ "Must respect notification limits"
+    warn file.lines > 200                                           @ "Consider splitting notification types"
+  }
+} 

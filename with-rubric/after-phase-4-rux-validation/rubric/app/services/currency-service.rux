@@ -1,0 +1,44 @@
+module CurrencyService {
+  @ "Handles currency exchange rates and conversion between supported currencies"
+  @ "Fetches exchange rates from exchangerate-api.com and provides conversion utilities"
+  
+  location: "src/services/currency-service.ts"
+  
+  interface {
+    @ "Public API for currency operations"
+    public fetchExchangeRates(baseCurrency: Currency) -> Promise<ExchangeRates>
+    public convertAmount(amount: number, fromCurrency: Currency, toCurrency: Currency, rates: ExchangeRates) -> number
+    public getCachedRates() -> ExchangeRates?
+    public setCachedRates(rates: ExchangeRates) -> void
+    public isRatesStale(rates: ExchangeRates) -> boolean
+  }
+  
+  state {
+    @ "Private service state"
+    private _apiKey: string?
+    private _baseUrl: string
+    private _cacheKey: string
+  }
+  
+  imports {
+    @ "External packages"
+    allow "fetch" as external
+    
+    @ "Internal types"
+    allow "../types/expense-types" as {Currency, ExchangeRates}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.network.fetch  @ "Can fetch exchange rates from API"
+    allow io.localStorage["exchange-rates-cache"]  @ "Can cache exchange rates"
+    deny io.console.*  @ "No console logging"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 150  @ "Getting large, consider splitting"
+    deny file.lines > 200  @ "Too large, must split"
+  }
+} 

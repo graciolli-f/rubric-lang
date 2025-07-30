@@ -1,0 +1,35 @@
+module GroupCard {
+  @ "Group card component for displaying group summary information.
+  @ Shows group name, member count, recent activity, and quick actions.
+  @ Provides clickable interface for group navigation."
+
+  type: "presentation"
+  
+  location: "src/components/GroupCard.tsx"
+  
+  interface {
+    public GroupCard(props: {
+      group: ExpenseGroup,
+      isSelected?: boolean,
+      onClick?: () -> void,
+      onEdit?: () -> void,
+      onDelete?: () -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/group-types" as {ExpenseGroup}
+    allow "../utils/formatters" as {formatCurrency, formatDate}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep logic in parent components"
+    require pattern.accessibility          @ "Must be accessible and keyboard navigable"
+    require pattern.responsive_design      @ "Must be responsive"
+    warn file.lines > 100                   @ "Card component getting complex"
+  }
+} 

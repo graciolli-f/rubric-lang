@@ -1,0 +1,55 @@
+module RealtimeStore {
+  @ "Zustand store for real-time collaboration and presence management.
+  @ Manages WebSocket connections, presence indicators, and activity feeds.
+  @ Coordinates real-time updates across the application."
+
+  type: "container"
+  
+  location: "src/stores/realtime-store.ts"
+  
+  interface {
+    public useRealtimeStore() -> {
+      isConnected: boolean,
+      presenceUsers: PresenceUser[],
+      activityFeed: ActivityEvent[],
+      optimisticUpdates: OptimisticUpdate[],
+      connectionState: string,
+      connect: (userId: string, token: string) -> Promise<void>,
+      disconnect: () -> void,
+      joinGroup: (groupId: string) -> void,
+      leaveGroup: (groupId: string) -> void,
+      updatePresence: (status: Partial<PresenceUser>) -> void,
+      addActivityEvent: (event: ActivityEvent) -> void,
+      addOptimisticUpdate: (update: OptimisticUpdate) -> void,
+      confirmOptimisticUpdate: (updateId: string) -> void,
+      revertOptimisticUpdate: (updateId: string) -> void,
+      getActiveUsers: (groupId?: string) -> PresenceUser[]
+    }
+  }
+  
+  state {
+    private _isConnected: boolean
+    private _presenceUsers: PresenceUser[]
+    private _activityFeed: ActivityEvent[]
+    private _optimisticUpdates: OptimisticUpdate[]
+    private _connectionState: string
+    private _currentGroupId: string | null
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../types/realtime-types" as {PresenceUser, ActivityEvent, OptimisticUpdate, WebSocketMessage}
+    allow "../services/websocket-service" as {WebSocketService}
+  }
+  
+  constraints {
+    deny io.*                         @ "Use websocket service for I/O operations"
+    deny imports ["../components/*"]  @ "Stores should not import components"
+    deny exports ["_*"]               @ "No private exports"
+    require pattern.connection_management @ "Must manage WebSocket connection state"
+    require pattern.optimistic_updates   @ "Must handle optimistic updates"
+    require pattern.presence_tracking    @ "Must track user presence"
+    warn file.lines > 220                @ "Store getting complex, consider splitting"
+  }
+} 

@@ -1,0 +1,47 @@
+module AuthStore {
+  @ "Zustand store for authentication state and user session management.
+  @ Manages authentication state, user profile data, and auth-related UI state.
+  @ Coordinates with auth service for authentication operations."
+
+  type: "container"
+  
+  location: "src/stores/auth-store.ts"
+  
+  interface {
+    public useAuthStore() -> {
+      user: User | null,
+      isAuthenticated: boolean,
+      isLoading: boolean,
+      error: string | null,
+      login: (credentials: LoginCredentials) -> Promise<void>,
+      signup: (data: SignupData) -> Promise<void>,
+      logout: () -> Promise<void>,
+      updateProfile: (data: Partial<UserProfile>) -> Promise<void>,
+      clearError: () -> void,
+      checkAuthStatus: () -> Promise<void>
+    }
+  }
+  
+  state {
+    private _user: User | null
+    private _isAuthenticated: boolean
+    private _isLoading: boolean
+    private _error: string | null
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../types/user-types" as {User, LoginCredentials, SignupData, UserProfile, AuthState}
+    allow "../services/auth-service" as {AuthService}
+  }
+  
+  constraints {
+    deny io.*                         @ "Use auth service for I/O operations"
+    deny imports ["../components/*"]  @ "Stores should not import components"
+    deny exports ["_*"]               @ "No private exports"
+    require pattern.error_handling    @ "Must handle authentication errors"
+    require pattern.loading_states    @ "Must track loading states"
+    warn file.lines > 150             @ "Store getting complex"
+  }
+} 

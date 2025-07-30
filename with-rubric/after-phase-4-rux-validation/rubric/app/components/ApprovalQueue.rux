@@ -1,0 +1,44 @@
+module ApprovalQueue {
+  @ "Approval queue component for displaying pending approval requests.
+  @ Shows expenses awaiting approval with quick action buttons.
+  @ Provides approval workflow interface for managers."
+
+  type: "container"
+  
+  location: "src/components/ApprovalQueue.tsx"
+  
+  interface {
+    public ApprovalQueue(props: {
+      groupId?: string,
+      userId?: string
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _selectedRequests: Set<string>
+    private _isLoading: boolean
+    private _filterStatus: "all" | "pending" | "approved" | "rejected"
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/approval-store" as {useApprovalStore}
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/approval-types" as {ApprovalRequest, ApprovalStatus}
+    allow "./ApprovalCard" as {ApprovalCard}
+    allow "./ApprovalActions" as {ApprovalActions}
+    allow "./ApprovalFilters" as {ApprovalFilters}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.loading_states          @ "Must handle loading states"
+    require pattern.empty_states            @ "Must handle empty approval queue"
+    require pattern.batch_actions           @ "Must support batch approval/rejection"
+    require pattern.permission_checks       @ "Must check approval permissions"
+    warn file.lines > 200                   @ "Container getting complex"
+  }
+} 

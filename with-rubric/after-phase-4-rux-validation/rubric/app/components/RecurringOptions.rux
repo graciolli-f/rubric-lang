@@ -1,0 +1,38 @@
+module RecurringOptions {
+  @ "Recurring expense configuration component"
+  @ "Checkbox and frequency selection for recurring expenses"
+  
+  location: "src/components/RecurringOptions.tsx"
+  
+  interface {
+    @ "Recurring options component"
+    public RecurringOptions(props: {
+      isRecurring: boolean,
+      frequency?: RecurringFrequency,
+      onRecurringChange: (isRecurring: boolean) -> void,
+      onFrequencyChange: (frequency?: RecurringFrequency) -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+    
+    @ "Internal types"
+    allow "../types/expense-types" as {RecurringFrequency, RECURRING_FREQUENCIES}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 80  @ "Getting large, consider splitting"
+    deny file.lines > 100  @ "Too large, must split"
+  }
+} 

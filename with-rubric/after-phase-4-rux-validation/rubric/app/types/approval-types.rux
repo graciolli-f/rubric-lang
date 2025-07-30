@@ -1,0 +1,59 @@
+module ApprovalTypes {
+  @ "Type definitions for expense approval workflow and status tracking.
+  @ Defines approval states, workflow steps, and notification structures.
+  @ Pure type definitions with no runtime dependencies."
+
+  type: "utility"
+  
+  location: "src/types/approval-types.ts"
+  
+  interface {
+    public ApprovalRequest: {
+      id: string,
+      expenseId: string,
+      requestedBy: string,
+      requestedAt: string,
+      status: ApprovalStatus,
+      approvers: ApprovalAction[],
+      reason?: string,
+      amount: number,
+      category: string
+    }
+    public ApprovalStatus: "pending" | "approved" | "rejected" | "cancelled"
+    public ApprovalAction: {
+      id: string,
+      approverId: string,
+      action: "approve" | "reject" | "request_changes",
+      actionAt: string,
+      comment?: string,
+      isRequired: boolean
+    }
+    public ApprovalRule: {
+      id: string,
+      groupId: string,
+      threshold: number,
+      requiredApprovers: string[],
+      anyApproverCount?: number,
+      isActive: boolean
+    }
+    public ApprovalNotification: {
+      id: string,
+      approvalRequestId: string,
+      recipientId: string,
+      type: "approval_request" | "approval_granted" | "approval_rejected",
+      sentAt: string,
+      readAt?: string
+    }
+  }
+  
+  imports {
+    deny imports.*  @ "Pure type definitions require no imports"
+  }
+  
+  constraints {
+    deny io.*                    @ "No I/O in type definitions"
+    deny exports ["*Service"]   @ "No service instances in types"
+    deny pattern.business_logic @ "Pure type definitions only"
+    require file.lines < 100    @ "Keep type files focused and small"
+  }
+} 

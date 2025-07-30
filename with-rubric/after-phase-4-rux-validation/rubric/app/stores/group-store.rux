@@ -1,0 +1,54 @@
+module GroupStore {
+  @ "Zustand store for expense groups and member management.
+  @ Manages group data, member operations, and invitation workflows.
+  @ Coordinates with group service and handles group-related UI state."
+
+  type: "container"
+  
+  location: "src/stores/group-store.ts"
+  
+  interface {
+    public useGroupStore() -> {
+      groups: ExpenseGroup[],
+      currentGroup: ExpenseGroup | null,
+      invitations: GroupInvitation[],
+      isLoading: boolean,
+      error: string | null,
+      createGroup: (data: Partial<ExpenseGroup>) -> Promise<void>,
+      updateGroup: (groupId: string, data: Partial<ExpenseGroup>) -> Promise<void>,
+      deleteGroup: (groupId: string) -> Promise<void>,
+      setCurrentGroup: (groupId: string | null) -> void,
+      loadUserGroups: () -> Promise<void>,
+      addMember: (groupId: string, member: GroupMember) -> Promise<void>,
+      removeMember: (groupId: string, userId: string) -> Promise<void>,
+      inviteUser: (groupId: string, email: string, role: string) -> Promise<void>,
+      handleInvitation: (invitationId: string, action: "accept" | "reject") -> Promise<void>,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    private _groups: ExpenseGroup[]
+    private _currentGroup: ExpenseGroup | null
+    private _invitations: GroupInvitation[]
+    private _isLoading: boolean
+    private _error: string | null
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../types/group-types" as {ExpenseGroup, GroupMember, GroupInvitation}
+    allow "../services/group-service" as {GroupService}
+  }
+  
+  constraints {
+    deny io.*                         @ "Use group service for I/O operations"
+    deny imports ["../components/*"]  @ "Stores should not import components"
+    deny exports ["_*"]               @ "No private exports"
+    require pattern.error_handling    @ "Must handle group operation errors"
+    require pattern.loading_states    @ "Must track loading states"
+    require pattern.optimistic_updates @ "Should support optimistic updates"
+    warn file.lines > 200             @ "Store getting complex, consider splitting"
+  }
+} 

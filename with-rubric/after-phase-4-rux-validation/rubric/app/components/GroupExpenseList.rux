@@ -1,0 +1,48 @@
+module GroupExpenseList {
+  @ "Group expense list component for displaying expenses within a group context.
+  @ Shows group expenses with approval status, splits, and real-time updates.
+  @ Extends ExpenseList with group-specific features and collaboration."
+
+  type: "container"
+  
+  location: "src/components/GroupExpenseList.tsx"
+  
+  interface {
+    public GroupExpenseList(props: {
+      groupId: string,
+      showApprovalStatus?: boolean,
+      allowEditing?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _expenses: Expense[]
+    private _isLoading: boolean
+    private _filterStatus: "all" | "pending" | "approved" | "personal"
+    private _sortBy: "date" | "amount" | "status"
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../stores/approval-store" as {useApprovalStore}
+    allow "../stores/realtime-store" as {useRealtimeStore}
+    allow "../types/expense-types" as {Expense}
+    allow "./ExpenseItem" as {ExpenseItem}
+    allow "./ApprovalStatus" as {ApprovalStatus}
+    allow "./PresenceIndicator" as {PresenceIndicator}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.loading_states          @ "Must handle loading states"
+    require pattern.real_time_updates       @ "Must handle real-time updates"
+    require pattern.optimistic_updates      @ "Must support optimistic updates"
+    require pattern.permission_checks       @ "Must check edit permissions"
+    warn file.lines > 250                   @ "Container getting very complex"
+  }
+} 

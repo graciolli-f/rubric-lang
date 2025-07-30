@@ -1,0 +1,43 @@
+module GroupForm {
+  @ "Group form component for creating and editing expense groups.
+  @ Handles group data input, validation, and submission.
+  @ Provides group configuration interface with settings."
+
+  type: "presentation"
+  
+  location: "src/components/GroupForm.tsx"
+  
+  interface {
+    public GroupForm(props: {
+      group?: ExpenseGroup,
+      onSave: (data: Partial<ExpenseGroup>) -> Promise<void>,
+      onCancel?: () -> void,
+      isEdit?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _formData: Partial<ExpenseGroup>
+    private _errors: Map<string, string>
+    private _isSubmitting: boolean
+    private _hasChanges: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/group-types" as {ExpenseGroup, GroupSettings}
+    allow "../utils/validation" as {validateGroupName, validateDescription}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep validation logic in utils"
+    require pattern.form_validation         @ "Must validate group data"
+    require pattern.loading_states          @ "Must show loading state during save"
+    require pattern.error_display           @ "Must display validation errors"
+    require pattern.unsaved_changes         @ "Must warn about unsaved changes"
+    warn file.lines > 180                   @ "Form getting complex"
+  }
+} 

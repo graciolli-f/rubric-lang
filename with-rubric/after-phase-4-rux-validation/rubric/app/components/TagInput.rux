@@ -1,0 +1,41 @@
+module TagInput {
+  @ "Tag input component with comma-separated values"
+  @ "Provides tag input with visual tag pills and validation"
+  
+  location: "src/components/TagInput.tsx"
+  
+  interface {
+    @ "Tag input component"
+    public TagInput(props: {
+      value: string,
+      onChange: (tags: string) -> void,
+      placeholder?: string,
+      suggestions?: string[]
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Component state"
+    private _inputValue: string
+    private _parsedTags: string[]
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 100  @ "Getting large, consider splitting"
+    deny file.lines > 120  @ "Too large, must split"
+  }
+} 

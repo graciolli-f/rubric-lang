@@ -1,0 +1,43 @@
+module UserProfile {
+  @ "User profile component for displaying and editing user information.
+  @ Shows user details, role information, and provides profile editing interface.
+  @ Handles profile updates with proper validation."
+
+  type: "presentation"
+  
+  location: "src/components/UserProfile.tsx"
+  
+  interface {
+    public UserProfile(props: {
+      user: User,
+      onClose?: () -> void,
+      allowEdit?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _isEditing: boolean
+    private _formData: UserProfile
+    private _errors: Map<string, string>
+    private _isSubmitting: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/user-types" as {User, UserProfile}
+    allow "../utils/validation" as {validateEmail, validateName}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep validation logic in utils"
+    require pattern.form_validation         @ "Must validate profile updates"
+    require pattern.loading_states          @ "Must show loading state during updates"
+    require pattern.error_display           @ "Must display validation errors"
+    require pattern.cancel_confirmation     @ "Must confirm unsaved changes"
+    warn file.lines > 160                   @ "Profile component getting complex"
+  }
+} 

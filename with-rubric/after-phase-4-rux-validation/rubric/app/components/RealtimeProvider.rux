@@ -1,0 +1,41 @@
+module RealtimeProvider {
+  @ "Real-time provider component for managing WebSocket connections.
+  @ Provides WebSocket context and connection management to child components.
+  @ Handles connection state, reconnection, and message distribution."
+
+  type: "container"
+  
+  location: "src/components/RealtimeProvider.tsx"
+  
+  interface {
+    public RealtimeProvider(props: {
+      children: React.ReactNode,
+      groupId?: string
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _isConnected: boolean
+    private _connectionError: string | null
+    private _lastActivity: string
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/realtime-store" as {useRealtimeStore}
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/realtime-types" as {WebSocketMessage}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.connection_management   @ "Must manage WebSocket connection lifecycle"
+    require pattern.error_handling          @ "Must handle connection errors"
+    require pattern.cleanup                 @ "Must cleanup on unmount"
+    require pattern.context_provider        @ "Must provide real-time context"
+    warn file.lines > 150                   @ "Provider getting complex"
+  }
+} 

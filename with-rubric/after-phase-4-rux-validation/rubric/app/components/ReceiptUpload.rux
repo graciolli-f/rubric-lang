@@ -1,0 +1,49 @@
+module ReceiptUpload {
+  @ "File upload component for receipt images"
+  @ "Handles drag-and-drop and click-to-upload for receipt photos"
+  
+  location: "src/components/ReceiptUpload.tsx"
+  
+  interface {
+    @ "Receipt upload component"
+    public ReceiptUpload(props: {
+      onReceiptSelect: (file: File) -> void,
+      currentReceipt?: {base64: string, fileName: string, fileSize: number},
+      isLoading?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Component state"
+    private _isDragOver: boolean
+    private _error: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+    
+    @ "Utilities for validation"
+    allow "../utils/validation" as {validateReceiptFile}
+    
+    @ "No direct service imports - use stores or hooks instead"
+    deny imports ["../services/*"] @ "Components must not directly import services"
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "Pattern requirements"
+    require pattern.focus_trap  @ "Must be keyboard accessible"
+    
+    @ "File constraints"
+    warn file.lines > 100  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 

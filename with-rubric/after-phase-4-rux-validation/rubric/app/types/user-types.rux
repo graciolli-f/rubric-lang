@@ -1,0 +1,52 @@
+module UserTypes {
+  @ "Type definitions for user authentication and profile management.
+  @ Defines user data structures, authentication states, and related interfaces.
+  @ Pure type definitions with no runtime dependencies."
+
+  type: "utility"
+  
+  location: "src/types/user-types.ts"
+  
+  interface {
+    public User: {
+      id: string,
+      email: string,
+      name: string,
+      role: "user" | "manager" | "admin",
+      createdAt: string,
+      lastActive: string
+    }
+    public AuthState: {
+      user: User | null,
+      isAuthenticated: boolean,
+      isLoading: boolean,
+      error: string | null
+    }
+    public LoginCredentials: {
+      email: string,
+      password: string
+    }
+    public SignupData: {
+      email: string,
+      password: string,
+      name: string,
+      confirmPassword: string
+    }
+    public UserProfile: {
+      name: string,
+      email: string,
+      role: string
+    }
+  }
+  
+  imports {
+    deny imports.*  @ "Pure type definitions require no imports"
+  }
+  
+  constraints {
+    deny io.*                    @ "No I/O in type definitions"
+    deny exports ["*Service"]   @ "No service instances in types"
+    deny pattern.business_logic @ "Pure type definitions only"
+    require file.lines < 100    @ "Keep type files focused and small"
+  }
+} 

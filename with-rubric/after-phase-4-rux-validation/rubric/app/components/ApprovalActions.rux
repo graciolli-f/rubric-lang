@@ -1,0 +1,44 @@
+module ApprovalActions {
+  @ "Approval actions component for approve/reject buttons and comments.
+  @ Provides approval decision interface with required comment fields.
+  @ Handles approval submission with proper validation."
+
+  type: "presentation"
+  
+  location: "src/components/ApprovalActions.tsx"
+  
+  interface {
+    public ApprovalActions(props: {
+      request: ApprovalRequest,
+      onApprove: (requestId: string, comment?: string) -> Promise<void>,
+      onReject: (requestId: string, comment: string) -> Promise<void>,
+      disabled?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _showCommentDialog: boolean
+    private _actionType: "approve" | "reject" | null
+    private _comment: string
+    private _isSubmitting: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/approval-types" as {ApprovalRequest}
+    allow "../utils/validation" as {validateComment}
+    allow "./ConfirmDialog" as {ConfirmDialog}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep validation logic in utils"
+    require pattern.confirmation_dialogs    @ "Must confirm approval actions"
+    require pattern.loading_states          @ "Must show loading state during actions"
+    require pattern.comment_validation      @ "Must validate rejection comments"
+    require pattern.accessibility          @ "Must be accessible"
+    warn file.lines > 150                   @ "Actions component getting complex"
+  }
+} 

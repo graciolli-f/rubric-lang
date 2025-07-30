@@ -1,0 +1,29 @@
+module AnalyticsSummary {
+  @ "Analytics summary component that displays key metrics and statistics.
+  @ Shows total expenses, average daily spending, and other summary information.
+  @ Pure presentation component that receives calculated metrics via props."
+  
+  location: "src/components/AnalyticsSummary.tsx"
+  
+  interface {
+    public AnalyticsSummary(props: {
+      totalExpenses: number,
+      averageDaily: number,
+      currentMonth: string,
+      transactionCount: number
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]       @ "Pure component, data via props"
+    deny imports ["../services/*"]     @ "No business logic"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.complex_calculations  @ "Calculations should be in parent"
+    warn file.lines > 80               @ "Summary should stay simple"
+  }
+} 
