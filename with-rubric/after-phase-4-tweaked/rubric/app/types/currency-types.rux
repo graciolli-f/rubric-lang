@@ -1,0 +1,36 @@
+module CurrencyTypes {
+  @ "Currency-related type definitions and validation functions"
+  @ "Defines supported currencies, exchange rates, and preferences"
+  
+  location: "src/types/currency-types.ts"
+  
+  interface {
+    @ "Currency types and constants"
+    public type Currency = "USD" | "EUR" | "GBP"
+    public type CurrencyPreferences = {
+      preferredCurrency: Currency,
+      lastUpdated: string
+    }
+    public type ExchangeRates = {
+      base: Currency,
+      rates: Record<Currency, number>,
+      lastUpdated: string
+    }
+    public const CURRENCIES: readonly Currency[]
+    public isValidCurrency(value: unknown) -> value is Currency
+  }
+  
+  imports {
+    @ "No external dependencies for type definitions"
+    deny imports.*  @ "Pure type definitions"
+  }
+  
+  constraints {
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 60  @ "Getting large, consider splitting"
+    deny file.lines > 80  @ "Too large, must split"
+  }
+} 

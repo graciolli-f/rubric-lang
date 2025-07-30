@@ -1,0 +1,31 @@
+module SignupForm {
+  @ "User registration form component with validation"
+  @ "Handles user signup with form validation and error display"
+  
+  type: "presentation"
+  
+  location: "src/components/SignupForm.tsx"
+  
+  interface {
+    @ "Signup form component"
+    public SignupForm(props: {
+      onSuccess?: () -> void,
+      onSwitchToLogin?: () -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../hooks/useAuthForm" as {useAuthForm}
+    allow "../types/auth-types" as {SignupData}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use hooks, not services directly"
+    deny imports ["../stores/*"]          @ "Use hooks for business logic, not stores directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 150                 @ "Getting large, consider splitting"
+    deny file.lines > 200                 @ "Too large, must split"
+  }
+} 

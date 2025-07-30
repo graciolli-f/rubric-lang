@@ -1,0 +1,51 @@
+module GroupStore {
+  @ "Zustand store for expense groups and collaboration state"
+  @ "Manages groups, invitations, presence, and real-time collaboration"
+  
+  type: "service"
+  
+  location: "src/stores/group-store.ts"
+  
+  interface {
+    @ "Public API for group management"
+    public useGroupStore() -> {
+      groups: ExpenseGroup[],
+      activeGroup: ExpenseGroup?,
+      presenceInfo: PresenceInfo[],
+      activityFeed: ActivityEntry[],
+      isLoading: boolean,
+      error: string?,
+      createGroup: (name: string, description: string) -> Promise<void>,
+      joinGroup: (groupId: string) -> Promise<void>,
+      leaveGroup: (groupId: string) -> Promise<void>,
+      setActiveGroup: (groupId: string?) -> void,
+      inviteUser: (groupId: string, email: string) -> Promise<void>,
+      addActivity: (entry: ActivityEntry) -> void
+    }
+  }
+  
+  state {
+    @ "Store state structure"
+    private groups: ExpenseGroup[]
+    private activeGroup: ExpenseGroup?
+    private presenceInfo: PresenceInfo[]
+    private activityFeed: ActivityEntry[]
+    private isLoading: boolean
+    private error: string?
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../services/websocket-service" as websocketService
+    allow "../types/group-types" as {ExpenseGroup, PresenceInfo, ActivityEntry}
+    allow "../types/auth-types" as {User}
+  }
+  
+  constraints {
+    allow io.localStorage["groups"]        @ "Can persist group data"
+    deny exports ["_*"]                    @ "No private state exports"
+    warn file.lines > 200                  @ "Getting large, consider splitting"
+    deny file.lines > 300                  @ "Too large, must split"
+  }
+} 

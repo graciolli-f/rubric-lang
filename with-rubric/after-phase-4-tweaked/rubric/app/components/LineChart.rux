@@ -1,0 +1,31 @@
+module LineChart {
+  @ "Line chart component that displays daily spending trends over time.
+  @ Pure visualization component using Recharts library.
+  @ Receives processed time-series data via props.
+  @ "Pure presentation component"
+
+  type: "presentation"
+  
+  location: "src/components/LineChart.tsx"
+  
+  interface {
+    public LineChart(props: {
+      data: Array<{date: string, amount: number}>,
+      title?: string
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "recharts" as external
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]       @ "Pure component, data via props"
+    deny imports ["../services/*"]     @ "No business logic"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.data_fetching         @ "Data should come via props"
+    warn file.lines > 120              @ "Chart component getting complex"
+  }
+} 

@@ -1,0 +1,27 @@
+module useApprovalOperations {
+  @ "Custom hook for expense approval operations"
+  @ "Encapsulates async approval and rejection logic"
+  
+  type: "hook"
+  
+  location: "src/hooks/useApprovalOperations.ts"
+  
+  interface {
+    public useApprovalOperations() -> {
+      handleApprove: (expenseId: string) -> Promise<void>,
+      handleReject: (expenseId: string) -> Promise<void>
+    }
+  }
+  
+  imports {
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/group-types" as {ApprovalStatus}
+  }
+  
+  constraints {
+    deny io.*                     @ "No I/O in pure hook"
+    deny pattern.inline_styles    @ "No styling logic in hooks"
+    warn file.lines > 100        @ "Keep hooks focused and small"
+  }
+} 

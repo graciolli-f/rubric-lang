@@ -1,0 +1,27 @@
+module PresenceIndicators {
+  @ "Real-time presence indicators showing active users"
+  @ "Displays avatars and status of users currently viewing the group"
+  
+  type: "presentation"
+  
+  location: "src/components/PresenceIndicators.tsx"
+  
+  interface {
+    @ "Presence indicators component"
+    public PresenceIndicators() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../types/group-types" as {PresenceInfo}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use stores, not services directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 100                 @ "Getting large, consider splitting"
+    deny file.lines > 150                 @ "Too large, must split"
+  }
+} 

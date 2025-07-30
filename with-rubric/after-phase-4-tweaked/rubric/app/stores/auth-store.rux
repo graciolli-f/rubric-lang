@@ -1,0 +1,44 @@
+module AuthStore {
+  @ "Zustand store for authentication state management"
+  @ "Manages user session, login/logout actions, and authentication state"
+  
+  type: "service"
+  
+  location: "src/stores/auth-store.ts"
+  
+  interface {
+    @ "Public API for authentication state"
+    public useAuthStore() -> {
+      user: User?,
+      isAuthenticated: boolean,
+      isLoading: boolean,
+      error: string?,
+      login: (credentials: LoginCredentials) -> Promise<void>,
+      signup: (data: SignupData) -> Promise<void>,
+      logout: () -> Promise<void>,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    @ "Store state structure"
+    private user: User?
+    private isAuthenticated: boolean
+    private isLoading: boolean
+    private error: string?
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../services/auth-service" as authService
+    allow "../services/websocket-service" as websocketService
+    allow "../types/auth-types" as {User, LoginCredentials, SignupData}
+  }
+  
+  constraints {
+    deny exports ["_*"]                    @ "No private state exports"
+    warn file.lines > 150                  @ "Getting large, consider splitting"
+    deny file.lines > 250                  @ "Too large, must split"
+  }
+} 

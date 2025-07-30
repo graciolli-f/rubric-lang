@@ -1,0 +1,31 @@
+module GroupTypes {
+  @ "Expense group and collaboration type definitions"
+  @ "Defines ExpenseGroup, GroupInvitation, and collaboration data structures"
+  
+  type: "utility"
+  
+  location: "src/types/group-types.ts"
+  
+  interface {
+    @ "Public API - exported types for groups and collaboration"
+    public type ExpenseGroup
+    public type GroupInvitation
+    public type GroupMember
+    public type ApprovalStatus
+    public type ActivityEntry
+    public type PresenceInfo
+    public isValidGroup(value: unknown) -> boolean
+    public isValidApprovalStatus(value: unknown) -> boolean
+  }
+  
+  imports {
+    allow "./auth-types" as {User, UserRole}
+  }
+  
+  constraints {
+    deny io.*                      @ "No I/O operations in types"
+    deny exports ["_*"]           @ "No private exports"
+    warn file.lines > 150        @ "Getting large, consider splitting"
+    deny file.lines > 200        @ "Too large, must split"
+  }
+} 

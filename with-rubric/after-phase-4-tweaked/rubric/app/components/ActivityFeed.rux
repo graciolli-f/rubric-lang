@@ -1,0 +1,27 @@
+module ActivityFeed {
+  @ "Real-time activity feed showing group changes and approvals"
+  @ "Displays chronological activity with user actions and timestamps"
+  
+  type: "presentation"
+  
+  location: "src/components/ActivityFeed.tsx"
+  
+  interface {
+    @ "Activity feed component"
+    public ActivityFeed() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../types/group-types" as {ActivityEntry}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use stores, not services directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 150                 @ "Getting large, consider splitting"
+    deny file.lines > 200                 @ "Too large, must split"
+  }
+} 

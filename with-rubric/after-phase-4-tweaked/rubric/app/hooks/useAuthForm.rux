@@ -1,0 +1,29 @@
+module useAuthForm {
+  @ "Custom hook for authentication form operations"
+  @ "Encapsulates async login and signup logic"
+  
+  type: "hook"
+  
+  location: "src/hooks/useAuthForm.ts"
+  
+  interface {
+    public useAuthForm() -> {
+      handleLogin: (credentials: LoginCredentials) -> Promise<void>,
+      handleSignup: (userData: SignupData) -> Promise<void>,
+      isLoading: boolean,
+      error: string | null,
+      clearError: () -> void
+    }
+  }
+  
+  imports {
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/auth-types" as {LoginCredentials, SignupData}
+  }
+  
+  constraints {
+    deny io.*                     @ "No I/O in pure hook"
+    deny pattern.inline_styles    @ "No styling logic in hooks"
+    warn file.lines > 100        @ "Keep hooks focused and small"
+  }
+} 

@@ -1,0 +1,31 @@
+module BudgetProgress {
+  @ "Budget progress component that displays budget vs actual spending with progress bar.
+  @ Shows remaining budget, percentage used, and visual progress indicator.
+  @ Receives budget data via props, pure presentation component.
+  @ Pure presentation component"
+
+  type: "presentation"
+  
+  location: "src/components/BudgetProgress.tsx"
+  
+  interface {
+    public BudgetProgress(props: {
+      budget: number,
+      spent: number,
+      onBudgetUpdate: (newBudget: number) -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../utils/formatters" as {formatCurrency}
+  }
+  
+  constraints {
+    deny imports ["../stores/*"]       @ "Pure component, data via props"
+    deny imports ["../services/*"]     @ "No business logic"
+    deny io.*                          @ "No I/O operations"
+    deny pattern.complex_calculations  @ "Calculations should be in parent"
+    warn file.lines > 100              @ "Progress component getting complex"
+  }
+} 

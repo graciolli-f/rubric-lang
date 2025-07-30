@@ -1,0 +1,30 @@
+module AuthTypes {
+  @ "User authentication and authorization type definitions"
+  @ "Defines User, LoginCredentials, and authentication-related data structures"
+  
+  type: "utility"
+  
+  location: "src/types/auth-types.ts"
+  
+  interface {
+    @ "Public API - exported types for authentication"
+    public type User
+    public type LoginCredentials
+    public type SignupData
+    public type AuthState
+    public type UserRole
+    public isValidUser(value: unknown) -> boolean
+    public isValidRole(value: unknown) -> boolean
+  }
+  
+  imports {
+    deny imports.*  @ "Pure type definitions with zero dependencies"
+  }
+  
+  constraints {
+    deny io.*                      @ "No I/O operations in types"
+    deny exports ["_*"]           @ "No private exports"
+    warn file.lines > 100        @ "Getting large, consider splitting"
+    deny file.lines > 150        @ "Too large, must split"
+  }
+} 

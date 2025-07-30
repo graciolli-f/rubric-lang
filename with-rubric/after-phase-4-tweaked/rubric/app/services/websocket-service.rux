@@ -1,0 +1,40 @@
+module WebSocketService {
+  @ "WebSocket service for real-time collaboration features"
+  @ "Handles real-time updates, presence tracking, and live collaboration"
+  
+  type: "service"
+  
+  location: "src/services/websocket-service.ts"
+  
+  interface {
+    @ "Public API for WebSocket operations"
+    public connect(groupId?: string) -> Promise<void>
+    public disconnect() -> void
+    public sendMessage(type: string, data: any) -> void
+    public onMessage(callback: (message: any) -> void) -> () -> void
+    public onPresenceUpdate(callback: (presence: PresenceInfo[]) -> void) -> () -> void
+    public updatePresence(status: string) -> void
+    public isConnected() -> boolean
+  }
+  
+  state {
+    @ "Private service state"
+    private _socket: WebSocket?
+    private _isConnected: boolean
+    private _messageHandlers: Set<Function>
+    private _presenceHandlers: Set<Function>
+  }
+  
+  imports {
+    allow "../types/group-types" as {PresenceInfo}
+    allow "../types/auth-types" as {User}
+  }
+  
+  constraints {
+    allow io.network.*                     @ "Can make WebSocket connections"
+    allow io.console.*                     @ "Can log connection events"
+    deny exports ["_*"]                    @ "No private state exports"
+    warn file.lines > 250                  @ "Getting large, consider splitting"
+    deny file.lines > 400                  @ "Too large, must split"
+  }
+} 

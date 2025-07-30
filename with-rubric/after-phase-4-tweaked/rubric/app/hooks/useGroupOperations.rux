@@ -1,0 +1,37 @@
+module useGroupOperations {
+  @ "Custom hook for group operations and modal state management"
+  @ "Encapsulates async group creation and joining logic"
+  
+  type: "hook"
+  
+  location: "src/hooks/useGroupOperations.ts"
+  
+  interface {
+    public useGroupOperations() -> {
+      showCreateModal: boolean,
+      setShowCreateModal: (show: boolean) -> void,
+      showJoinModal: boolean,
+      setShowJoinModal: (show: boolean) -> void,
+      newGroupName: string,
+      setNewGroupName: (name: string) -> void,
+      newGroupDescription: string,
+      setNewGroupDescription: (desc: string) -> void,
+      joinGroupId: string,
+      setJoinGroupId: (id: string) -> void,
+      handleCreateGroup: (e: FormEvent) -> Promise<void>,
+      handleJoinGroup: (e: FormEvent) -> Promise<void>,
+      isLoading: boolean
+    }
+  }
+  
+  imports {
+    allow "react" as {useState}
+    allow "../stores/group-store" as {useGroupStore}
+  }
+  
+  constraints {
+    deny io.*                     @ "No I/O in pure hook"
+    deny pattern.inline_styles    @ "No styling logic in hooks"
+    warn file.lines > 100        @ "Keep hooks focused and small"
+  }
+} 

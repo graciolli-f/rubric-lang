@@ -1,0 +1,136 @@
+module [ModuleName] {
+  @ "[Primary purpose of this module]"
+  @ "[Additional context or important notes]"
+  
+  type: "container|presentation|service|utility"
+  
+  location: "src/[layer]/[filename].ts"
+  
+  interface {
+    @ "Public API - what other modules can use"
+    public [methodName]([paramName]: [Type]) -> [ReturnType]
+    public get [propertyName]() -> [Type]
+    public [componentName](props: {
+      [propName]: [PropType],
+      [optionalProp]?: [PropType]
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Private implementation details"
+    private _[stateName]: [Type]
+    private _[loading]: boolean
+    private _[error]: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "[package-name]" as external
+    allow "[scoped/@package]" as external
+    
+    @ "Internal imports with specific items"
+    allow "../[path]/[module]" as {[NamedImport], [OtherImport]}
+    
+    @ "Internal imports (entire module)"
+    allow "../[path]/[module]" as [alias]
+    
+    @ "For container components - import related components"
+    allow "./[RelatedComponent]" as {[RelatedComponent]}
+    allow "./[RelatedEditComponent]" as {[RelatedEditComponent]}
+    allow "./[RelatedDialog]" as {[RelatedDialog]}
+    
+    @ "Denied patterns"
+    deny "[pattern]"
+    deny imports ["../[layer]/*"]
+    deny imports.*  @ "No imports allowed at all"
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*          @ "No console logging"
+    deny io.network.*          @ "No API calls"
+    deny io.localStorage.*     @ "No localStorage access"
+    allow io.localStorage["[key]"]  @ "Can access specific key"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]        @ "No private members"
+    deny exports ["*Service"]  @ "No service instances"
+    deny exports ["[specific]"] @ "Don't export [specific]"
+    
+    @ "Pattern restrictions"
+    deny pattern.inline_modal   @ "No modals in list items"
+    deny pattern.inline_editing @ "Use separate edit component"
+    deny pattern.business_logic @ "Keep business logic in services"
+    
+    @ "Pattern requirements"
+    require pattern.focus_trap  @ "Must trap focus in modals"
+    require pattern.escape_key  @ "Must handle escape key"
+    
+    @ "File constraints"
+    warn file.lines > [150]    @ "Getting large, consider splitting"
+    deny file.lines > [250]    @ "Too large, must split"
+    deny file.complexity > [10] @ "Cyclomatic complexity too high"
+  }
+}
+
+# =============================================================================
+# TEMPLATE INSTRUCTIONS
+# =============================================================================
+# 
+# 1. Replace all [placeholders] with actual values
+# 2. Remove any sections that don't apply to your module
+# 3. Common layer names: components, stores, services, utils, types
+# 4. For React components, the interface returns JSX.Element
+# 5. For hooks/stores, the interface returns the hook's return value
+# 6. For services, use Promise<T> for async operations
+# 7. For types modules, often use "deny imports.*"
+#
+# ARCHITECTURAL PATTERNS:
+#
+# Container Components (lists, pages):
+#   - CAN import related display/edit/dialog components
+#   - Manage UI orchestration state (which item is editing)
+#   - Delegate data operations to stores
+#
+# Display Components (items, cards):
+#   - Props-only, no store access
+#   - Emit events via callbacks
+#   - Stay simple and focused
+#
+# Edit Components (forms, inline edits):
+#   - Manage form state locally
+#   - Validate input
+#   - Call parent callbacks to save
+#
+# EXAMPLES BY LAYER:
+#
+# Components: Can import from stores and utils, deny services/data
+# Stores: Can import from services and types, deny components  
+# Services: Can import from data and types, deny components/stores
+# Utils: Usually deny imports.* (pure functions)
+# Types: Always deny imports.* (zero dependencies)
+#
+# COMMON PATTERNS:
+#
+# React Component:
+#   interface {
+#     public WeatherCard(props: { city: string, temp: number }) -> JSX.Element
+#   }
+#
+# Custom Hook:
+#   interface {
+#     public useWebSocket(url: string) -> { 
+#       isConnected: boolean,
+#       lastMessage: Message?,
+#       send: (data: any) -> void,
+#       disconnect: () -> void
+#     }
+#   }
+#
+# Service:
+#   interface {
+#     public searchProducts(query: string) -> Promise<Product[]>
+#     public calculateShipping(items: CartItem[], zip: string) -> ShippingRate
+#   }
+#
+# =============================================================================

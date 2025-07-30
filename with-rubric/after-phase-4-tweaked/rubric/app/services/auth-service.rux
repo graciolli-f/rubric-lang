@@ -1,0 +1,38 @@
+module AuthService {
+  @ "Authentication service for user login, signup, and session management"
+  @ "Handles user authentication, session persistence, and mock backend operations"
+  
+  type: "service"
+  
+  location: "src/services/auth-service.ts"
+  
+  interface {
+    @ "Public API for authentication operations"
+    public login(credentials: LoginCredentials) -> Promise<{ user: User, token: string }>
+    public signup(data: SignupData) -> Promise<{ user: User, token: string }>
+    public logout() -> Promise<void>
+    public getCurrentUser() -> User?
+    public isAuthenticated() -> boolean
+    public validateToken(token: string) -> Promise<User?>
+  }
+  
+  state {
+    @ "Private service state"
+    private _currentUser: User?
+    private _authToken: string?
+  }
+  
+  imports {
+    allow "crypto" as external
+    allow "../types/auth-types" as {User, LoginCredentials, SignupData}
+  }
+  
+  constraints {
+    allow io.localStorage["auth-token"]    @ "Can persist auth token"
+    allow io.localStorage["current-user"]  @ "Can persist current user"
+    allow io.console.*                     @ "Can log auth events"
+    deny exports ["_*"]                    @ "No private state exports"
+    warn file.lines > 200                  @ "Getting large, consider splitting"
+    deny file.lines > 300                  @ "Too large, must split"
+  }
+} 

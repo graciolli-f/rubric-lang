@@ -1,0 +1,28 @@
+module AuthPage {
+  @ "Authentication page container with login/signup toggle"
+  @ "Manages switching between login and signup forms"
+  
+  type: "container"
+  
+  location: "src/components/AuthPage.tsx"
+  
+  interface {
+    @ "Authentication page component"
+    public AuthPage() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "./LoginForm" as {LoginForm}
+    allow "./SignupForm" as {SignupForm}
+    allow "../stores/auth-store" as {useAuthStore}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use stores, not services directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 100                 @ "Getting large, consider splitting"
+    deny file.lines > 150                 @ "Too large, must split"
+  }
+} 

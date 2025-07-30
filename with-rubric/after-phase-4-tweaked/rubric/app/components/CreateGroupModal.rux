@@ -1,0 +1,32 @@
+module CreateGroupModal {
+  @ "Modal component for creating new expense groups"
+  @ "Provides form interface for group creation"
+  
+  type: "presentation"
+  
+  location: "src/components/CreateGroupModal.tsx"
+  
+  interface {
+    public CreateGroupModal(props: {
+      isOpen: boolean,
+      onClose: () -> void,
+      onSubmit: (e: FormEvent) -> void,
+      newGroupName: string,
+      setNewGroupName: (name: string) -> void,
+      newGroupDescription: string,
+      setNewGroupDescription: (desc: string) -> void,
+      isLoading: boolean
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+  }
+  
+  constraints {
+    deny imports ["../services/*"]     @ "Use props for business logic"
+    deny io.*                          @ "No I/O in modal components"
+    deny pattern.inline_styles         @ "Use CSS classes"
+    warn file.lines > 100             @ "Keep modals simple"
+  }
+} 

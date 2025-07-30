@@ -1,0 +1,33 @@
+module useCurrencyDisplay {
+  @ "Custom hook for currency display logic and conversion"
+  @ "Encapsulates currency business logic for reuse across components"
+  
+  type: "hook"
+  
+  location: "src/hooks/useCurrencyDisplay.ts"
+  
+  interface {
+    public useCurrencyDisplay() -> {
+      getDisplayAmount: (amount: number, currency: string) -> CurrencyDisplayResult,
+      getCurrencySymbol: (currency: string) -> string
+    }
+    public CurrencyDisplayResult -> {
+      amount: number,
+      currency: string,
+      isConverted: boolean,
+      symbol: string
+    }
+  }
+  
+  imports {
+    allow "../stores/currency-store" as {useCurrencyStore}
+    allow "../services/currency-service" as {convertAmount}
+    allow "../types/currency-types" as {Currency}
+  }
+  
+  constraints {
+    deny io.*                     @ "No I/O in pure hook"
+    deny pattern.inline_styles    @ "No styling logic in hooks"
+    warn file.lines > 100        @ "Keep hooks focused and small"
+  }
+} 

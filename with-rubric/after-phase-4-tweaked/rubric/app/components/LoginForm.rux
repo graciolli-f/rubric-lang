@@ -1,0 +1,31 @@
+module LoginForm {
+  @ "User login form component with email/password validation"
+  @ "Handles user login with form validation and error display"
+  
+  type: "presentation"
+  
+  location: "src/components/LoginForm.tsx"
+  
+  interface {
+    @ "Login form component"
+    public LoginForm(props: {
+      onSuccess?: () -> void,
+      onSwitchToSignup?: () -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../hooks/useAuthForm" as {useAuthForm}
+    allow "../types/auth-types" as {LoginCredentials}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use hooks, not services directly"
+    deny imports ["../stores/*"]          @ "Use hooks for business logic, not stores directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 150                 @ "Getting large, consider splitting"
+    deny file.lines > 200                 @ "Too large, must split"
+  }
+} 

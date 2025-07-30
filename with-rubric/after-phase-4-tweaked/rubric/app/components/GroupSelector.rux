@@ -1,0 +1,31 @@
+module GroupSelector {
+  @ "Expense group selector with create/join options"
+  @ "Allows users to switch between personal and group expense views"
+  
+  type: "presentation"
+  
+  location: "src/components/GroupSelector.tsx"
+  
+  interface {
+    @ "Group selector component"
+    public GroupSelector() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/group-types" as {ExpenseGroup}
+    allow "../hooks/useGroupOperations" as {useGroupOperations}
+    allow "./CreateGroupModal" as {CreateGroupModal}
+    allow "./JoinGroupModal" as {JoinGroupModal}
+  }
+  
+  constraints {
+    deny imports ["../services/*"]        @ "Use stores and hooks, not services directly"
+    deny io.*                             @ "No direct I/O operations"
+    deny pattern.inline_styles            @ "Use CSS classes"
+    warn file.lines > 150                 @ "Getting large, consider splitting"
+    deny file.lines > 200                 @ "Too large, must split"
+  }
+} 
