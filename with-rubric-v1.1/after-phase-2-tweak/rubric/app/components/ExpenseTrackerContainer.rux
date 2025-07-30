@@ -1,0 +1,70 @@
+module ExpenseTrackerContainer {
+  @ "Container component that orchestrates expense tracking interface"
+  @ "Manages UI state and coordinates child components"
+
+  type: "container"
+  
+  location: "src/components/ExpenseTrackerContainer.tsx"
+  
+  interface {
+    @ "Default export for the container component"
+    public default ExpenseTrackerContainer() -> JSX.Element
+  }
+  
+  state {
+    @ "Local UI state only - complex state should be in stores"
+    private editingExpenseId: string?
+    private showDeleteConfirm: string?
+    private isFormValid: boolean
+    private activeView: "expenses" | "analytics"
+  }
+  
+  imports {
+    @ "React and UI libraries"
+    allow "react" as external
+    allow "lucide-react" as external
+    
+    @ "Can import child components for composition"
+    allow "./ExpenseForm" as {ExpenseForm}
+    allow "./ExpenseList" as {ExpenseList}
+    allow "./NavigationTabs" as {NavigationTabs}
+    allow "./AnalyticsPage" as {AnalyticsPage}
+    
+    @ "Can import from stores for data"
+    allow "../stores/expense-store" as {useExpenseStore}
+    
+    @ "Utilities for UI formatting"
+    allow "../utils/currency" as {formatCurrency}
+    
+    @ "Type imports"
+    allow "../types/expense.types" as types
+    
+    @ "Cannot import services or data layers directly"
+    deny imports ["../services/*", "../data/*"]
+  }
+  
+  constraints {
+    @ "No direct API calls"
+    deny io.network.*
+    
+    @ "No direct storage access"
+    deny io.localStorage.*
+    
+    @ "Limited console usage"
+    warn io.console.*
+    
+    @ "No business logic"
+    deny pattern.business_logic
+    
+    @ "Must handle loading and error states from stores"
+    require pattern.error_boundary
+    require pattern.loading_state
+    
+    @ "Accessibility requirements"
+    require pattern.aria_labels
+    
+    @ "Size constraints"
+    warn file.lines > 200
+    deny file.lines > 300
+  }
+}
