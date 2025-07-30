@@ -1,0 +1,56 @@
+module BudgetProgress {
+  @ "Pure presentation component for displaying budget progress bar"
+  @ "Props-only, no stores or external state"
+
+  type: "presentation"
+  
+  location: "src/components/BudgetProgress.tsx"
+  
+  interface {
+    @ "Props interface"
+    public BudgetProgress(props: {
+      budgetData: BudgetState,
+      className?: string,
+      showDetails?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "No local state needed for progress display"
+  }
+  
+  imports {
+    @ "React only"
+    allow "react" as external
+    
+    @ "UI libraries"
+    allow "clsx" as external
+    
+    @ "Type imports only"
+    allow "../types/expense.types" as types
+    
+    @ "No stores, services, or data access"
+    deny imports ["../stores/*", "../services/*", "../data/*", "../hooks/*"]
+  }
+  
+  constraints {
+    @ "No side effects"
+    deny io.*
+    
+    @ "No async operations"
+    deny pattern.async_operations
+    
+    @ "Props validation"
+    require pattern.prop_types_or_typescript
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Keep it simple"
+    warn file.lines > 100
+    deny file.lines > 150
+    
+    @ "Performance"
+    require pattern.memo_if_expensive
+  }
+}

@@ -1,0 +1,90 @@
+module AnalyticsUtils {
+  @ "Pure utility functions for analytics calculations"
+  @ "No side effects, deterministic outputs"
+
+  type: "utility"
+  
+  location: "src/utils/analytics.ts"
+  
+  interface {
+    @ "Category analysis functions"
+    public calculateCategoryBreakdown(expenses: Expense[], totalAmount: number) -> CategorySpending[]
+    public getCategoryPercentage(categoryAmount: number, totalAmount: number) -> number
+    
+    @ "Time-based analysis functions"
+    public generateDailyTrends(expenses: Expense[], days: number) -> DailySpending[]
+    public filterExpensesForCurrentMonth(expenses: Expense[]) -> Expense[]
+    public getAverageDailySpending(expenses: Expense[], days: number) -> number
+    
+    @ "Budget calculation functions"
+    public calculateBudgetState(expenses: Expense[], monthlyBudget: number) -> BudgetState
+    public getCurrentMonthTotal(expenses: Expense[]) -> number
+    public getRemainingBudget(spent: number, budget: number) -> number
+    
+    @ "Date utility functions"
+    public isCurrentMonth(dateString: string) -> boolean
+    public getDaysInCurrentMonth() -> number
+    public getStartOfMonth(date?: Date) -> Date
+    public formatDateForChart(date: Date) -> string
+    
+    @ "Helper types and constants"
+    public readonly CHART_COLORS: string[]
+  }
+  
+  state {
+    @ "No mutable state allowed in utilities"
+    @ "Chart configuration constants"
+    private readonly CHART_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"]
+    private readonly DAYS_TO_ANALYZE = 30
+  }
+  
+  imports {
+    @ "Types only"
+    allow "../types/expense.types" as types
+    
+    @ "Date manipulation libraries"
+    allow "date-fns" as date
+    
+    @ "No framework imports"
+    deny imports ["react", "vue", "@angular/*"]
+    
+    @ "No side-effect imports"
+    deny imports ["../stores/*", "../services/*", "../data/*"]
+    
+    @ "No component imports"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "Pure functions only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.mutations
+    
+    @ "No async operations"
+    deny pattern.async
+    deny pattern.promises
+    
+    @ "Deterministic behavior"
+    require pattern.deterministic
+    deny pattern.random_without_seed
+    deny pattern.date_now @ "Use passed timestamps"
+    
+    @ "Error handling"
+    require pattern.defensive @ "Validate inputs"
+    
+    @ "Documentation"
+    require pattern.jsdoc @ "Document complex functions"
+    
+    @ "Testing"
+    require pattern.unit_testable
+    
+    @ "Export all public functions"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 200
+    deny file.lines > 400
+    warn function.lines > 20
+  }
+}

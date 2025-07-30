@@ -1,0 +1,99 @@
+module ExpenseStore {
+  @ "State management for expense tracking"
+  @ "Coordinates between UI and manages expense data"
+
+  type: "store"
+  
+  location: "src/stores/expense-store.ts"
+  
+  interface {
+    @ "Zustand store hook"
+    public useExpenseStore() -> {
+      @ "State"
+      expenses: Expense[],
+      isLoading: boolean,
+      error: string?,
+      
+      @ "Actions"
+      addExpense: (data: ExpenseFormData) -> void,
+      updateExpense: (id: string, data: ExpenseFormData) -> void,
+      deleteExpense: (id: string) -> void,
+      
+      @ "UI state actions"
+      clearError: () -> void,
+      reset: () -> void,
+      
+      @ "Computed values"
+      getTotalAmount: () -> number,
+      getExpensesSortedByDate: () -> Expense[],
+      
+      @ "Budget management"
+      monthlyBudget: number,
+      setBudget: (amount: number) -> void,
+      
+      @ "Analytics computed values"
+      getAnalyticsData: () -> AnalyticsData,
+      getCategoryBreakdown: () -> CategorySpending[],
+      getDailyTrends: () -> DailySpending[],
+      getBudgetState: () -> BudgetState,
+      getAverageDailySpending: () -> number
+    }
+  }
+  
+  state {
+    @ "Internal state shape"
+    private _expenses: Expense[]
+    private _isLoading: boolean
+    private _error: string?
+    private _monthlyBudget: number
+  }
+  
+  imports {
+    @ "State management library"
+    allow "zustand" as external
+    
+    @ "Types"
+    allow "../types/expense.types" as types
+    
+    @ "Utilities for ID generation and date handling"
+    allow "../utils/date" as {toISOString}
+    
+    @ "Analytics utilities for computed values"
+    allow "../utils/analytics" as analytics
+    
+    @ "No services since no backend yet"
+    deny imports ["../services/*"]
+    
+    @ "Cannot import data layer directly"
+    deny imports ["../data/*"]
+    
+    @ "Cannot import components"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "State management patterns"
+    require pattern.immutable_updates
+    require pattern.action_error_handling
+    
+    @ "No business logic beyond basic CRUD"
+    deny pattern.complex_calculations
+    deny pattern.validation_logic
+    
+    @ "No API calls - in-memory only for now"
+    deny io.network.*
+    
+    @ "No storage for now"
+    deny io.localStorage.*
+    
+    @ "DevTools support"
+    allow io.console.* when NODE_ENV="development"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Size constraints"
+    warn file.lines > 150
+    deny file.lines > 250
+  }
+}
