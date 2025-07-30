@@ -1,0 +1,68 @@
+module ExpenseTypes {
+  @ "Type definitions for expense tracking domain"
+  @ "No side effects, pure type definitions"
+
+  type: "utility"
+  
+  location: "src/types/expense.types.ts"
+  
+  interface {
+    @ "Category enumeration"
+    public enum Category = "Food" | "Transport" | "Shopping" | "Bills" | "Entertainment" | "Other"
+    
+    @ "Main expense interface"
+    public interface Expense {
+      id: string,
+      amount: number,
+      category: Category,
+      date: string,
+      description: string,
+      createdAt: string,
+      updatedAt: string
+    }
+    
+    @ "Form data interface"
+    public interface ExpenseFormData {
+      amount: number,
+      category: Category,
+      date: string,
+      description: string
+    }
+    
+    @ "Store state interface"
+    public interface ExpenseState {
+      expenses: Expense[],
+      isLoading: boolean,
+      error: string?
+    }
+  }
+  
+  state {
+    @ "No mutable state allowed in types"
+    @ "Constants for category options"
+    private readonly CATEGORIES = ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"]
+  }
+  
+  imports {
+    @ "No imports needed for basic types"
+    deny imports ["*"]
+  }
+  
+  constraints {
+    @ "Pure type definitions only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.mutations
+    
+    @ "No async operations"
+    deny pattern.async
+    deny pattern.promises
+    
+    @ "Export all public types"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 100
+    deny file.lines > 200
+  }
+}
