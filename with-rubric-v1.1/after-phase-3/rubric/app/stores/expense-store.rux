@@ -1,0 +1,118 @@
+module ExpenseStore {
+  @ "State management for expense tracking"
+  @ "Coordinates between UI and manages expense data"
+
+  type: "store"
+  
+  location: "src/stores/expense-store.ts"
+  
+  interface {
+    @ "Zustand store hook"
+    public useExpenseStore() -> {
+      @ "State"
+      expenses: Expense[],
+      isLoading: boolean,
+      error: string?,
+      budget: Budget,
+      preferredCurrency: Currency,
+      tagFilter: string[],
+      
+      @ "Basic expense actions"
+      addExpense: (data: ExpenseFormData) -> void,
+      updateExpense: (id: string, data: ExpenseFormData) -> void,
+      deleteExpense: (id: string) -> void,
+      
+      @ "Advanced expense actions"
+      uploadReceipt: (file: File) -> Promise<string>,
+      deleteReceipt: (receiptId: string) -> Promise<void>,
+      exportExpenses: (options?: ExportOptions) -> Promise<void>,
+      generateRecurringExpenses: () -> Promise<void>,
+      
+      @ "Currency actions"
+      setPreferredCurrency: (currency: Currency) -> Promise<void>,
+      convertExpenseAmount: (expense: Expense, toCurrency: Currency) -> Promise<number>,
+      
+      @ "Filter actions"
+      setTagFilter: (tags: string[]) -> void,
+      clearFilters: () -> void,
+      
+      @ "Budget actions"
+      setBudget: (amount: number) -> void,
+      
+      @ "UI state actions"
+      clearError: () -> void,
+      reset: () -> void,
+      
+      @ "Computed values"
+      getTotalAmount: () -> number,
+      getExpensesSortedByDate: () -> Expense[],
+      getFilteredExpenses: () -> Expense[],
+      getCurrentMonthSpending: () -> number,
+      getRemainingBudget: () -> number,
+      getBudgetProgress: () -> number,
+      getAllTags: () -> string[]
+    }
+  }
+  
+  state {
+    @ "Internal state shape"
+    private _expenses: Expense[]
+    private _isLoading: boolean
+    private _error: string?
+  }
+  
+  imports {
+    @ "State management library"
+    allow "zustand" as external
+    
+    @ "Types"
+    allow "../types/expense.types" as types
+    
+    @ "Utilities for ID generation and date handling"
+    allow "../utils/date" as {toISOString}
+    
+    @ "Services for advanced features"
+    allow "../services/receipt-service" as receiptService
+    allow "../services/currency-service" as currencyService
+    allow "../services/export-service" as exportService
+    allow "../services/recurring-service" as recurringService
+    
+    @ "Cannot import data layer directly"
+    deny imports ["../data/*"]
+    
+    @ "Cannot import components"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "State management patterns"
+    require pattern.immutable_updates
+    require pattern.action_error_handling
+    
+    @ "Basic business logic allowed for coordination"
+    allow pattern.service_orchestration
+    allow pattern.data_transformation
+    
+    @ "Network operations for currency service"
+    allow io.network.* @ "For exchange rate fetching"
+    
+    @ "Storage operations for receipts and preferences"
+    allow io.localStorage.* @ "For receipt storage and user preferences"
+    
+    @ "File operations for receipt upload"
+    allow io.file.* @ "For receipt file handling"
+    
+    @ "DOM operations for export download"
+    allow io.dom.* @ "For CSV download"
+    
+    @ "DevTools support"
+    allow io.console.* when NODE_ENV="development"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Size constraints for expanded functionality"
+    warn file.lines > 300
+    deny file.lines > 500
+  }
+}
