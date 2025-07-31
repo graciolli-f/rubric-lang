@@ -1,0 +1,53 @@
+module ErrorBoundary {
+  @ "Error boundary container component that catches React errors"
+  @ "Provides fallback UI when child components throw errors"
+
+  type: "container"
+  
+  location: "src/components/ErrorBoundary.tsx"
+  
+  interface {
+    @ "Default export for the error boundary component"
+    public default ErrorBoundary(props: {children: React.ReactNode}) -> JSX.Element
+  }
+  
+  state {
+    @ "Error boundary state for React error handling"
+    private hasError: boolean
+    private error: Error?
+    private errorInfo: React.ErrorInfo?
+  }
+  
+  imports {
+    @ "React and error handling"
+    allow "react" as external
+    
+    @ "Type imports"
+    allow "../types" as types
+  }
+  
+  constraints {
+    @ "No API calls in error boundary"
+    deny io.network.*
+    
+    @ "No storage access"
+    deny io.localStorage.*
+    
+    @ "Console allowed for error logging"
+    allow io.console.error
+    warn io.console.*
+    
+    @ "No business logic"
+    deny pattern.business_logic
+    
+    @ "Must provide error recovery"
+    require pattern.error_recovery
+    
+    @ "Accessibility requirements"
+    require pattern.aria_labels
+    
+    @ "Size constraints - keep error boundaries simple"
+    warn file.lines > 100
+    deny file.lines > 150
+  }
+}

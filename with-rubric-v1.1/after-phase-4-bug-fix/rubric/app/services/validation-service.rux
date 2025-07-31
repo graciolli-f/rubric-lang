@@ -1,0 +1,41 @@
+module ValidationService {
+  @ "Service for business logic validation"
+  @ "Validates data according to business rules"
+
+  type: "service"
+  
+  location: "src/services/validation-service.ts"
+  
+  interface {
+    @ "Default export for the validation service"
+    public function validateExpenseData(data: ExpenseFormData) -> ValidationResult
+    public function validateReceiptFile(file: File) -> ValidationResult
+  }
+  
+  imports {
+    @ "Type imports for validation"
+    allow "../types/expense.types" as types
+    allow "../utils/validation" as {validateExpenseData, validateReceiptFile}
+    
+    @ "Cannot import components, stores, or data"
+    deny imports ["../components/*", "../stores/*", "../data/*"]
+  }
+  
+  constraints {
+    @ "No UI operations"
+    deny io.dom.*
+    
+    @ "No direct storage access"
+    deny io.localStorage.*
+    
+    @ "Limited console usage"
+    warn io.console.*
+    
+    @ "Business logic is allowed"
+    allow pattern.business_logic
+    
+    @ "Size constraints"
+    warn file.lines > 100
+    deny file.lines > 200
+  }
+}

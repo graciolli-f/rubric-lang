@@ -1,0 +1,97 @@
+module AuthService {
+  @ "Business logic for user authentication and management"
+  @ "Orchestrates data operations and enforces security rules"
+
+  type: "service"
+  
+  location: "src/services/auth-service.ts"
+  
+  interface {
+    @ "Authentication methods"
+    public login(data: LoginData) -> Promise<AuthResponse>
+    public signup(data: SignupData) -> Promise<AuthResponse>
+    public logout() -> Promise<void>
+    public refreshToken(token: string) -> Promise<AuthResponse>
+    
+    @ "Password management"
+    public requestPasswordReset(email: string) -> Promise<void>
+    public resetPassword(data: PasswordResetData) -> Promise<void>
+    public changePassword(oldPassword: string, newPassword: string) -> Promise<void>
+    
+    @ "User management"
+    public updateProfile(userId: string, data: Partial<User>) -> Promise<User>
+    public deleteAccount(userId: string) -> Promise<void>
+    public getUserProfile(userId: string) -> Promise<User>
+    
+    @ "Session management"
+    public validateSession(token: string) -> Promise<User>
+    public invalidateSession(token: string) -> Promise<void>
+    
+    @ "Validation methods"
+    public validateEmail(email: string) -> boolean
+    public validatePassword(password: string) -> ValidationResult
+    public validateSignupData(data: SignupData) -> ValidationResult
+  }
+  
+  state {
+    @ "Service-level configuration"
+    private _config: AuthConfig
+    private _tokenCache: Map<string, User>
+    private _sessionExpiry: Map<string, number>
+  }
+  
+  imports {
+    @ "Data layer imports"
+    allow "../data/auth-data" as {authData}
+    allow "../data/user-data" as {userData}
+    
+    @ "Types and interfaces"
+    allow "../types/auth.types" as types
+    
+    @ "Utilities"
+    allow "../utils/validation" as validators
+    allow "../utils/encryption" as {hashPassword, comparePassword}
+    allow "../utils/errors" as {AppError, ErrorCode}
+    
+    @ "External libraries for auth"
+    allow "jsonwebtoken" as external
+    allow "bcrypt" as external
+    allow "zod" as external
+    
+    @ "Cannot import UI or stores"
+    deny imports ["../components/*", "../stores/*"]
+  }
+  
+  constraints {
+    @ "Security requirements"
+    require pattern.password_hashing
+    require pattern.token_validation
+    require pattern.input_sanitization
+    
+    @ "Error handling required"
+    require pattern.try_catch_blocks
+    require pattern.error_transformation
+    
+    @ "No UI concerns"
+    deny pattern.jsx_elements
+    deny imports ["react", "@mui/material"]
+    
+    @ "Business logic validation"
+    require pattern.input_validation
+    require pattern.business_rules
+    
+    @ "Secure logging - no sensitive data"
+    allow io.console.error
+    allow io.console.warn when NODE_ENV="development"
+    deny pattern.log_passwords
+    deny pattern.log_tokens
+    
+    @ "Export only public interface"
+    deny exports ["_*", "config", "cache"]
+    
+    @ "Complexity management"
+    warn file.lines > 300
+    deny file.lines > 500
+    warn function.complexity > 10
+  }
+}

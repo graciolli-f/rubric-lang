@@ -1,0 +1,67 @@
+module ExpenseForm {
+  @ "Pure presentation component for expense form"
+  @ "Props-only, handles form input and validation"
+
+  type: "presentation"
+  
+  location: "src/components/ExpenseForm.tsx"
+  
+  interface {
+    @ "Props interface"
+    public ExpenseForm(props: {
+      initialData?: ExpenseFormData,
+      onSubmit: (data: ExpenseFormData) -> void,
+      onCancel?: () -> void,
+      className?: string,
+      disabled?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Form state for controlled inputs"
+    private formData: ExpenseFormData
+    private errors: Record<string, string>
+    private isSubmitting: boolean
+  }
+  
+  imports {
+    @ "React only"
+    allow "react" as external
+    
+    @ "UI libraries"
+    allow "lucide-react" as external
+    allow "clsx" as external
+    
+    @ "Type imports only"
+    allow "../types/expense.types" as types
+    
+    @ "UI-specific utilities only"
+    allow "../utils/currency" as {formatCurrency, isValidAmount}
+    allow "../utils/date" as {formatDate}
+    
+    @ "No stores, services, or data access"
+    deny imports ["../stores/*", "../services/*", "../data/*", "../hooks/*"]
+  }
+  
+  constraints {
+    @ "No side effects beyond form management"
+    deny io.network.*
+    deny io.localStorage.*
+    
+    @ "No async operations"
+    deny pattern.async_operations
+    
+    @ "Props validation"
+    require pattern.prop_types_or_typescript
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Keep it simple"
+    warn file.lines > 150
+    deny file.lines > 200
+    
+    @ "Performance"
+    require pattern.memo_if_expensive
+  }
+}

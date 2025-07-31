@@ -1,0 +1,68 @@
+module ExpenseList {
+  @ "Pure presentation component for displaying expense list"
+  @ "Props-only, renders list of expenses with total"
+
+  type: "presentation"
+  
+  location: "src/components/ExpenseList.tsx"
+  
+  interface {
+    @ "Props interface"
+    public ExpenseList(props: {
+      expenses: Expense[],
+      onEdit?: (expense: Expense) -> void,
+      onDelete?: (id: string) -> void,
+      editingId?: string,
+      className?: string
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Minimal local state for UI interactions only"
+    private hoveredId: string?
+    private showDeleteConfirm: string?
+  }
+  
+  imports {
+    @ "React only"
+    allow "react" as external
+    
+    @ "UI libraries"
+    allow "lucide-react" as external
+    allow "clsx" as external
+    
+    @ "Child components"
+    allow "./ExpenseItem" as {ExpenseItem}
+    
+    @ "Type imports only"
+    allow "../types/expense.types" as types
+    
+    @ "UI-specific utilities only"
+    allow "../utils/currency" as {formatCurrency}
+    allow "../utils/date" as {formatDate}
+    
+    @ "No stores, services, or data access"
+    deny imports ["../stores/*", "../services/*", "../data/*", "../hooks/*"]
+  }
+  
+  constraints {
+    @ "No side effects"
+    deny io.*
+    
+    @ "No async operations"
+    deny pattern.async_operations
+    
+    @ "Props validation"
+    require pattern.prop_types_or_typescript
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Keep it simple"
+    warn file.lines > 120
+    deny file.lines > 180
+    
+    @ "Performance"
+    require pattern.memo_if_expensive
+  }
+}
