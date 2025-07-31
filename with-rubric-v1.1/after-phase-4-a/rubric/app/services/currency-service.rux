@@ -1,0 +1,89 @@
+module CurrencyService {
+  @ "Business logic for currency conversion and exchange rates"
+  @ "Fetches exchange rates and handles currency conversions"
+
+  type: "service"
+  
+  location: "src/services/currency-service.ts"
+  
+  interface {
+    @ "Exchange rate methods"
+    public fetchExchangeRates(baseCurrency: Currency) -> Promise<Record<Currency, number>>
+    public getExchangeRate(fromCurrency: Currency, toCurrency: Currency) -> Promise<number>
+    public convertAmount(amount: number, fromCurrency: Currency, toCurrency: Currency) -> Promise<number>
+    
+    @ "Currency formatting methods"
+    public formatCurrency(amount: number, currency: Currency) -> string
+    public getCurrencySymbol(currency: Currency) -> string
+    public parseCurrencyAmount(formattedAmount: string, currency: Currency) -> number
+    
+    @ "Cache management"
+    public refreshExchangeRates() -> Promise<void>
+    public clearCache() -> Promise<void>
+    public getCacheAge() -> Promise<number>
+    
+    @ "User preferences"
+    public setPreferredCurrency(currency: Currency) -> Promise<void>
+    public getPreferredCurrency() -> Promise<Currency>
+  }
+  
+  state {
+    @ "Service caching"
+    private _rateCache: Map<string, ExchangeRate>
+    private _cacheExpiry: number
+    
+    @ "Service configuration"
+    private _config: {
+      apiUrl: string,
+      cacheTimeout: number,
+      retryAttempts: number
+    }
+  }
+  
+  imports {
+    @ "Types and interfaces"
+    allow "../types/expense.types" as types
+    
+    @ "Utilities for validation and formatting"
+    allow "../utils/validation" as {validators}
+    allow "../utils/date" as {dateUtils}
+    
+    @ "Cannot import UI or stores"
+    deny imports ["../components/*", "../stores/*"]
+    
+    @ "Cannot import data layer directly"
+    deny imports ["../data/*"]
+  }
+  
+  constraints {
+    @ "Error handling required"
+    require pattern.try_catch_blocks
+    require pattern.error_transformation
+    
+    @ "No UI concerns"
+    deny pattern.jsx_elements
+    deny imports ["react", "@mui/material"]
+    
+    @ "Input validation"
+    require pattern.input_validation
+    require pattern.business_rules
+    
+    @ "Network operations allowed for API calls"
+    allow io.network.*
+    
+    @ "LocalStorage for caching"
+    allow io.localStorage.*
+    
+    @ "Logging for debugging"
+    allow io.console.error
+    allow io.console.warn when NODE_ENV="development"
+    
+    @ "Export only public interface"
+    deny exports ["_*", "cache", "config"]
+    
+    @ "Complexity management"
+    warn file.lines > 250
+    deny file.lines > 400
+    warn function.complexity > 10
+  }
+}

@@ -1,0 +1,67 @@
+module ExpenseLineChart {
+  @ "Pure presentation component for displaying daily spending trends as line chart"
+  @ "Props-only, no stores or external state"
+
+  type: "presentation"
+  
+  location: "src/components/ExpenseLineChart.tsx"
+  
+  interface {
+    @ "Props interface"
+    public ExpenseLineChart(props: {
+      data: DailySpendingData[],
+      className?: string,
+      height?: number,
+      timeframe?: number
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Minimal local state for UI interactions only"
+    private hoveredPoint: string?
+    private isTooltipVisible: boolean
+  }
+  
+  imports {
+    @ "React only"
+    allow "react" as external
+    
+    @ "Recharts library for charts"
+    allow "recharts" as external
+    
+    @ "UI libraries"
+    allow "lucide-react" as external
+    allow "clsx" as external
+    
+    @ "Type imports only"
+    allow "../types/expense.types" as types
+    
+    @ "UI-specific utilities only"
+    allow "../utils/currency" as {formatCurrency}
+    allow "../utils/date" as {formatDate}
+    
+    @ "No stores, services, or data access"
+    deny imports ["../stores/*", "../services/*", "../data/*", "../hooks/*"]
+  }
+  
+  constraints {
+    @ "No side effects"
+    deny io.*
+    
+    @ "No async operations"
+    deny pattern.async_operations
+    
+    @ "Props validation"
+    require pattern.prop_types_or_typescript
+    
+    @ "Export restrictions"
+    deny exports ["_*"]
+    
+    @ "Keep it simple"
+    warn file.lines > 100
+    deny file.lines > 150
+    
+    @ "Performance"
+    require pattern.memo_if_expensive
+  }
+}

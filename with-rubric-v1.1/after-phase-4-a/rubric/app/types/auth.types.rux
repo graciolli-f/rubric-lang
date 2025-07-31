@@ -1,0 +1,90 @@
+module AuthTypes {
+  @ "Type definitions for authentication and user management"
+  @ "No side effects, pure type definitions"
+
+  type: "utility"
+  
+  location: "src/types/auth.types.ts"
+  
+  interface {
+    @ "User interface"
+    public interface User {
+      id: string,
+      email: string,
+      name: string,
+      role: UserRole,
+      avatar?: string,
+      createdAt: string,
+      updatedAt: string
+    }
+    
+    @ "User role enumeration"
+    public enum UserRole = "user" | "manager" | "admin"
+    
+    @ "Authentication state interface"
+    public interface AuthState {
+      user: User?,
+      isAuthenticated: boolean,
+      isLoading: boolean,
+      error: string?
+    }
+    
+    @ "Login/signup form data interfaces"
+    public interface LoginData {
+      email: string,
+      password: string
+    }
+    
+    public interface SignupData {
+      email: string,
+      password: string,
+      name: string
+    }
+    
+    @ "Authentication response interfaces"
+    public interface AuthResponse {
+      user: User,
+      token: string,
+      refreshToken: string
+    }
+    
+    @ "Session interface"
+    public interface Session {
+      userId: string,
+      token: string,
+      expiresAt: string
+    }
+    
+    @ "Password reset interfaces"
+    public interface PasswordResetRequest {
+      email: string
+    }
+    
+    public interface PasswordResetData {
+      token: string,
+      newPassword: string
+    }
+  }
+  
+  state {
+    @ "No mutable state allowed in types"
+  }
+  
+  imports {
+    @ "No imports allowed in types"
+  }
+  
+  constraints {
+    @ "Pure types only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.runtime_code
+    
+    @ "Export all public types"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 100
+    deny file.lines > 200
+  }
+}
