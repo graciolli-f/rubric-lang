@@ -1,0 +1,92 @@
+module AnalyticsUtils {
+  @ "Pure utility functions for expense analytics calculations"
+  @ "No side effects, deterministic outputs"
+
+  type: "utility"
+  
+  location: "src/utils/analytics.ts"
+  
+  interface {
+    @ "Analytics calculation functions"
+    public calculateCategoryBreakdown(expenses: Expense[]) -> CategoryData[]
+    public calculateDailySpending(expenses: Expense[], days: number) -> DailySpendingData[]
+    public getMonthlySpending(expenses: Expense[], month?: string) -> number
+    public getAverageDailySpending(expenses: Expense[], days: number) -> number
+    public getRemainingBudget(budget: number, spent: number) -> number
+    public getBudgetProgress(budget: number, spent: number) -> number
+    
+    @ "Helper functions"
+    public filterExpensesByMonth(expenses: Expense[], month?: string) -> Expense[]
+    public filterExpensesByDateRange(expenses: Expense[], startDate: string, endDate: string) -> Expense[]
+    public groupExpensesByCategory(expenses: Expense[]) -> Record<Category, Expense[]>
+    public groupExpensesByDate(expenses: Expense[]) -> Record<string, Expense[]>
+    
+    @ "Helper types"
+    public type CategoryData = { category: Category; amount: number; percentage: number }
+    public type DailySpendingData = { date: string; amount: number; formattedDate: string }
+  }
+  
+  state {
+    @ "No mutable state allowed in utilities"
+    @ "Use module-level constants instead"
+    private readonly DEFAULT_DAYS = 30
+    private readonly CATEGORY_COLORS = { 
+      Food: "#8884d8",
+      Transport: "#82ca9d", 
+      Shopping: "#ffc658",
+      Bills: "#ff7c7c",
+      Entertainment: "#8dd1e1",
+      Other: "#d084d0"
+    }
+  }
+  
+  imports {
+    @ "Types only"
+    allow "../types/expense.types" as types
+    
+    @ "Other utilities for composition"
+    allow "./date" as {isCurrentMonth, formatDate, getDateRange}
+    
+    @ "No framework imports"
+    deny imports ["react", "vue", "@angular/*"]
+    
+    @ "No side-effect imports"
+    deny imports ["../stores/*", "../services/*", "../data/*"]
+    
+    @ "No component imports"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "Pure functions only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.mutations
+    
+    @ "No async operations"
+    deny pattern.async
+    deny pattern.promises
+    
+    @ "Deterministic behavior"
+    require pattern.deterministic
+    deny pattern.random_without_seed
+    deny pattern.date_now @ "Use passed timestamps"
+    
+    @ "Error handling"
+    require pattern.defensive @ "Validate inputs"
+    
+    @ "Documentation"
+    require pattern.jsdoc @ "Document complex functions"
+    
+    @ "Testing"
+    require pattern.unit_testable
+    
+    @ "Export all public functions"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 200
+    deny file.lines > 400
+    warn function.lines > 20
+  }
+}

@@ -1,0 +1,98 @@
+module ValidationUtils {
+  @ "Pure utility functions for validation"
+  @ "No side effects, deterministic outputs"
+
+  type: "utility"
+  
+  location: "src/utils/validation.ts"
+  
+  interface {
+    @ "File validation functions"
+    public validateFile(file: File, options: FileValidationOptions) -> ValidationResult
+    public validateImageFile(file: File) -> ValidationResult
+    
+    @ "Expense validation functions" 
+    public validateExpenseData(data: ExpenseFormData) -> ValidationResult
+    public validateAmount(amount: number) -> ValidationResult
+    public validateTags(tags: string[]) -> ValidationResult
+    
+    @ "Currency validation functions"
+    public validateCurrency(currency: string) -> ValidationResult
+    public validateExchangeRate(rate: ExchangeRate) -> ValidationResult
+    
+    @ "General validation functions"
+    public isRequired(value: unknown) -> boolean
+    public isPositiveNumber(value: number) -> boolean
+    public isValidDate(dateString: string) -> boolean
+    
+    @ "Validation result helpers"
+    public createValidationResult(isValid: boolean, errors?: string[]) -> ValidationResult
+    public combineValidationResults(results: ValidationResult[]) -> ValidationResult
+    
+    @ "Helper types"
+    public type ValidationResult = {
+      isValid: boolean,
+      errors: string[]
+    }
+    
+    public type FileValidationOptions = {
+      maxSize?: number,
+      allowedTypes?: string[]
+    }
+  }
+  
+  state {
+    @ "No mutable state allowed in utilities"
+    @ "Use module-level constants instead"
+    private readonly VALIDATION_CONFIG = {
+      maxFileSize: 5242880,
+      allowedImageTypes: ["image/jpeg", "image/png", "image/webp"],
+      maxTagLength: 20,
+      maxDescriptionLength: 200
+    }
+  }
+  
+  imports {
+    @ "Types only"
+    allow "../types/expense.types" as types
+    
+    @ "No framework imports"
+    deny imports ["react", "vue", "@angular/*"]
+    
+    @ "No side-effect imports"
+    deny imports ["../stores/*", "../services/*", "../data/*"]
+    
+    @ "No component imports"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "Pure functions only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.mutations
+    
+    @ "No async operations"
+    deny pattern.async
+    deny pattern.promises
+    
+    @ "Deterministic behavior"
+    require pattern.deterministic
+    deny pattern.random_without_seed
+    deny pattern.date_now @ "Use passed timestamps"
+    
+    @ "Error handling"
+    require pattern.defensive @ "Validate inputs"
+    
+    @ "Documentation"
+    require pattern.jsdoc @ "Document complex functions"
+    
+    @ "Export all public functions"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 100
+    deny file.lines > 250
+    warn function.lines > 15
+  }
+}
