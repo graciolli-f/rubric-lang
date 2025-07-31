@@ -1,0 +1,64 @@
+module FormValidationUtils {
+  @ "Pure utility functions for form validation"
+  @ "No side effects, deterministic outputs"
+
+  type: "utility"
+  
+  location: "src/utils/form-validation.ts"
+  
+  interface {
+    @ "Validation functions"
+    public validateExpenseForm(formData: ExpenseFormData) -> ValidationErrors
+    public hasValidationErrors(errors: ValidationErrors) -> boolean
+    
+    @ "Helper types"
+    public interface ValidationErrors {
+      [key: string]: string
+    }
+  }
+  
+  state {
+    @ "No mutable state allowed in utilities"
+  }
+  
+  imports {
+    @ "Types only"
+    allow "../types/expense.types" as types
+    
+    @ "Other utilities for composition"
+    allow "./currency" as {isValidAmount}
+    
+    @ "No framework imports"
+    deny imports ["react", "vue", "@angular/*"]
+    
+    @ "No side-effect imports"
+    deny imports ["../stores/*", "../services/*", "../data/*"]
+    
+    @ "No component imports"
+    deny imports ["../components/*"]
+  }
+  
+  constraints {
+    @ "Pure functions only"
+    deny io.*  @ "No I/O operations"
+    deny pattern.side_effects
+    deny pattern.mutations
+    
+    @ "No async operations"
+    deny pattern.async
+    deny pattern.promises
+    
+    @ "Deterministic behavior"
+    require pattern.deterministic
+    
+    @ "Error handling"
+    require pattern.defensive @ "Validate inputs"
+    
+    @ "Export all public functions"
+    require exports ["[!_]*"]
+    
+    @ "Size constraints"
+    warn file.lines > 50
+    deny file.lines > 100
+  }
+}
