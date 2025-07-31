@@ -1,0 +1,46 @@
+module GroupService {
+  @ "Group management service for expense groups and member operations.
+  @ Handles group CRUD operations, member management, and invitation workflows.
+  @ Provides secure group operations with proper permission checks."
+
+  type: "service"
+  
+  location: "src/services/group-service.ts"
+  
+  interface {
+    public createGroup(data: Partial<ExpenseGroup>) -> Promise<ExpenseGroup>
+    public updateGroup(groupId: string, data: Partial<ExpenseGroup>) -> Promise<ExpenseGroup>
+    public deleteGroup(groupId: string) -> Promise<void>
+    public getGroup(groupId: string) -> Promise<ExpenseGroup>
+    public getUserGroups(userId: string) -> Promise<ExpenseGroup[]>
+    public addMember(groupId: string, member: GroupMember) -> Promise<void>
+    public removeMember(groupId: string, userId: string) -> Promise<void>
+    public updateMemberRole(groupId: string, userId: string, role: string) -> Promise<void>
+    public inviteUser(groupId: string, email: string, role: string) -> Promise<GroupInvitation>
+    public acceptInvitation(invitationId: string) -> Promise<void>
+    public rejectInvitation(invitationId: string) -> Promise<void>
+  }
+  
+  state {
+    private _groupsCache: Map<string, ExpenseGroup>
+    private _invitationsCache: Map<string, GroupInvitation[]>
+  }
+  
+  imports {
+    allow "../types/group-types" as {ExpenseGroup, GroupMember, GroupInvitation}
+    allow "../types/user-types" as {User}
+    allow "../utils/permissions" as {canManageGroup, canInviteMembers}
+    allow "./notification-service" as {NotificationService}
+  }
+  
+  constraints {
+    allow io.network.fetch["/api/groups/*"]  @ "Can make group API calls"
+    deny io.localStorage.*                   @ "Use stores for caching"
+    deny io.console.*                        @ "No console logging"
+    deny exports ["_*"]                      @ "No private exports"
+    require pattern.permission_checks        @ "Must validate user permissions"
+    require pattern.error_handling           @ "Must handle API errors"
+    require pattern.data_validation          @ "Must validate group data"
+    warn file.lines > 300                    @ "Consider splitting group operations"
+  }
+} 

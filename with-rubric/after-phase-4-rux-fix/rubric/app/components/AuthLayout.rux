@@ -1,0 +1,37 @@
+module AuthLayout {
+  @ "Authentication layout component for login and signup pages.
+  @ Provides consistent layout and routing for authentication views.
+  @ Handles authentication state management and redirects."
+
+  type: "container"
+  
+  location: "src/components/AuthLayout.tsx"
+  
+  interface {
+    public AuthLayout() -> JSX.Element
+  }
+  
+  state {
+    private _currentView: "login" | "signup"
+    private _isLoading: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "react-router-dom" as external
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "./LoginForm" as {LoginForm}
+    allow "./SignupForm" as {SignupForm}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in layout components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.auth_redirect           @ "Must redirect authenticated users"
+    require pattern.responsive_layout       @ "Must be responsive"
+    require pattern.loading_states          @ "Must handle loading states"
+    warn file.lines > 120                   @ "Layout getting complex"
+  }
+} 

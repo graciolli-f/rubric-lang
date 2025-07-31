@@ -1,0 +1,44 @@
+module AuthService {
+  @ "Authentication service for user login, signup, and session management.
+  @ Handles user credentials validation, JWT tokens, and authentication state.
+  @ Provides secure authentication operations with proper error handling."
+
+  type: "service"
+  
+  location: "src/services/auth-service.ts"
+  
+  interface {
+    public login(credentials: LoginCredentials) -> Promise<User>
+    public signup(data: SignupData) -> Promise<User>
+    public logout() -> Promise<void>
+    public validateToken(token: string) -> Promise<User>
+    public refreshToken() -> Promise<string>
+    public updateProfile(data: Partial<UserProfile>) -> Promise<User>
+    public resetPassword(email: string) -> Promise<void>
+    public getCurrentUser() -> User | null
+    public isAuthenticated() -> boolean
+  }
+  
+  state {
+    private _currentUser: User | null
+    private _token: string | null
+    private _refreshTimer: NodeJS.Timeout | null
+  }
+  
+  imports {
+    allow "../types/user-types" as {User, LoginCredentials, SignupData, UserProfile}
+    allow "../utils/encryption" as {hashPassword, validatePassword, generateToken}
+    allow "../utils/storage" as {getStorageItem, setStorageItem, removeStorageItem}
+  }
+  
+  constraints {
+    allow io.localStorage["auth_token", "user_data"]  @ "Can store auth tokens"
+    allow io.network.fetch["/api/auth/*"]             @ "Can make auth API calls"
+    deny io.console.*                                 @ "No console logging of sensitive data"
+    deny exports ["_*"]                               @ "No private exports"
+    deny exports ["*token*"]                          @ "Don't expose tokens directly"
+    require pattern.error_handling                    @ "Must handle auth errors properly"
+    require pattern.token_validation                  @ "Must validate tokens before use"
+    warn file.lines > 200                             @ "Consider splitting auth concerns"
+  }
+} 

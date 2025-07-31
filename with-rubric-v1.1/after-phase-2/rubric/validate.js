@@ -124,6 +124,7 @@ class RubricValidator {
 
     // Check exports
     this.validateExports(filePath, content, rules);
+    this.validateUnusedExports(filePath, content, rules);
 
     // NEW: Check for business logic in presentation components
     if (rules.isComponent) {
@@ -155,7 +156,17 @@ class RubricValidator {
 
     if (!isPresentationComponent && !isRootOrContainer) return;
     if (isRootOrContainer) return; // Skip business logic validation for root/container components
+    // Check for error boundaries in container components
+    if (rules.componentType === 'container' && !content.includes('componentDidCatch') && !content.includes('ErrorBoundary')) {
+      this.addViolation(filePath, rules.moduleName, 'pattern',
+        'Container components must implement error boundaries', null, 'error');
+    }
 
+    // Check for useEffect hooks in container components
+    if (rules.componentType === 'container' && content.includes('useEffect')) {
+      this.addViolation(filePath, rules.moduleName, 'pattern',
+        'Container components should not use useEffect', null, 'error');
+    }
     // UI-specific patterns that are ALLOWED
     const allowedUIPatterns = [
       // Form validation
@@ -426,6 +437,25 @@ class RubricValidator {
       }
     }
   }
+
+  validateUnusedExports(filePath, content, rules) {
+    // Only check utility modules
+    if (!filePath.includes('/utils/')) return;
+    
+    const exportRegex = /export\s+(?:const|function|class)\s+(\w+)/g;
+    const exports = [...content.matchAll(exportRegex)].map(m => m[1]);
+    
+    // For each export, check if it's imported anywhere
+    exports.forEach(exportName => {
+      // This is a simple check - could be enhanced
+      const importPattern = new RegExp(`import.*{[^}]*${exportName}[^}]*}.*from.*${path.basename(filePath, '.ts')}`);
+      
+      // Would need to scan all files - for now just add warning
+      this.addViolation(filePath, rules.moduleName, 'unused-export',
+        `Exported function '${exportName}' may be unused - verify it's imported elsewhere`, 
+        null, 'warning');
+    });
+  }  
 
   matchesPattern(path, pattern) {
     // Handle wildcards in patterns

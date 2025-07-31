@@ -1,184 +1,181 @@
 /**
- * Pure utility functions for analytics calculations
+ * Pure utility functions for expense analytics calculations
  * No side effects, deterministic outputs
  */
 
-import type { 
-  Expense, 
-  CategorySpending, 
-  DailySpending, 
-  BudgetState, 
-  Category,
-  DEFAULT_MONTHLY_BUDGET 
-} from '../types/expense.types';
+import type { Expense, Category, CategoryData, DailySpendingData } from '../types/expense.types';
+import { CATEGORY_COLORS } from '../types/expense.types';
+import { formatDate } from './date';
 
-// Chart configuration constants
-export const CHART_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
-const DAYS_TO_ANALYZE = 30;
+// Constants
+const DEFAULT_DAYS = 30;
 
 /**
- * Calculate category breakdown with percentages
+ * Calculate expense breakdown by category with percentages
  */
-export function calculateCategoryBreakdown(expenses: Expense[], totalAmount: number): CategorySpending[] {
+export function calculateCategoryBreakdown(expenses: Expense[]): CategoryData[] {
   if (!expenses || expenses.length === 0) {
     return [];
   }
 
-  const categoryTotals = new Map<Category, number>();
-  
-  // Sum amounts by category
-  expenses.forEach(expense => {
-    const current = categoryTotals.get(expense.category) || 0;
-    categoryTotals.set(expense.category, current + expense.amount);
-  });
+  const categoryTotals = groupExpensesByCategory(expenses);
+  const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
-  // Convert to array with percentages
-  return Array.from(categoryTotals.entries()).map(([category, amount]) => ({
-    category,
-    amount,
-    percentage: getCategoryPercentage(amount, totalAmount)
-  })).sort((a, b) => b.amount - a.amount);
+  return Object.entries(categoryTotals).map(([category, categoryExpenses]) => {
+    const amount = categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    const percentage = totalAmount > 0 ? (amount / totalAmount) * 100 : 0;
+    
+    return {
+      category: category as Category,
+      amount,
+      percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places
+      color: CATEGORY_COLORS[category as Category]
+    };
+  }).filter(item => item.amount > 0);
 }
 
 /**
- * Calculate percentage for a category
+ * Calculate daily spending trends over specified number of days
  */
-export function getCategoryPercentage(categoryAmount: number, totalAmount: number): number {
-  if (totalAmount === 0) return 0;
-  return Math.round((categoryAmount / totalAmount) * 100 * 100) / 100; // Round to 2 decimal places
-}
-
-/**
- * Generate daily spending trends for the last N days
- */
-export function generateDailyTrends(expenses: Expense[], days: number = DAYS_TO_ANALYZE): DailySpending[] {
+export function calculateDailySpending(expenses: Expense[], days: number = DEFAULT_DAYS): DailySpendingData[] {
   if (!expenses || expenses.length === 0) {
     return [];
   }
 
   const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - days);
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - days + 1);
 
-  // Create a map for daily totals
-  const dailyTotals = new Map<string, number>();
+  // Filter expenses within the date range
+  const filteredExpenses = filterExpensesByDateRange(
+    expenses,
+    startDate.toISOString().slice(0, 10),
+    endDate.toISOString().slice(0, 10)
+  );
 
-  // Initialize all days with 0
+  // Group expenses by date
+  const dailyTotals = groupExpensesByDate(filteredExpenses);
+
+  // Create array for all days in range, including days with no expenses
+  const result: DailySpendingData[] = [];
   for (let i = 0; i < days; i++) {
-    const date = new Date(startDate);
-    date.setDate(startDate.getDate() + i);
-    const dateKey = formatDateForChart(date);
-    dailyTotals.set(dateKey, 0);
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+    const dateString = currentDate.toISOString().slice(0, 10);
+    
+    const dayExpenses = dailyTotals[dateString] || [];
+    const amount = dayExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+    
+    result.push({
+      date: dateString,
+      amount,
+      formattedDate: formatDate(dateString)
+    });
   }
 
-  // Sum expenses by day
-  expenses.forEach(expense => {
-    const expenseDate = new Date(expense.date);
-    if (expenseDate >= startDate && expenseDate <= endDate) {
-      const dateKey = formatDateForChart(expenseDate);
-      const current = dailyTotals.get(dateKey) || 0;
-      dailyTotals.set(dateKey, current + expense.amount);
-    }
-  });
-
-  // Convert to array and sort by date
-  return Array.from(dailyTotals.entries())
-    .map(([date, amount]) => ({ date, amount }))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  return result;
 }
 
 /**
- * Filter expenses for current month only
+ * Get total spending for a specific month
  */
-export function filterExpensesForCurrentMonth(expenses: Expense[]): Expense[] {
-  if (!expenses || expenses.length === 0) {
-    return [];
-  }
-
-  return expenses.filter(expense => isCurrentMonth(expense.date));
-}
-
-/**
- * Calculate average daily spending over given period
- */
-export function getAverageDailySpending(expenses: Expense[], days: number = DAYS_TO_ANALYZE): number {
-  if (!expenses || expenses.length === 0 || days === 0) {
-    return 0;
-  }
-
-  const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  return Math.round((total / days) * 100) / 100; // Round to 2 decimal places
-}
-
-/**
- * Calculate complete budget state
- */
-export function calculateBudgetState(expenses: Expense[], monthlyBudget: number): BudgetState {
-  const currentMonthExpenses = filterExpensesForCurrentMonth(expenses);
-  const currentMonthSpent = getCurrentMonthTotal(currentMonthExpenses);
-  const remainingBudget = getRemainingBudget(currentMonthSpent, monthlyBudget);
-
-  return {
-    monthlyBudget,
-    currentMonthSpent,
-    remainingBudget,
-    isOverBudget: currentMonthSpent > monthlyBudget
-  };
-}
-
-/**
- * Get total spending for current month
- */
-export function getCurrentMonthTotal(expenses: Expense[]): number {
+export function getMonthlySpending(expenses: Expense[], month?: string): number {
   if (!expenses || expenses.length === 0) {
     return 0;
   }
 
-  return expenses.reduce((total, expense) => total + expense.amount, 0);
+  const targetMonth = month || new Date().toISOString().slice(0, 7);
+  return filterExpensesByMonth(expenses, targetMonth)
+    .reduce((total, expense) => total + expense.amount, 0);
 }
 
 /**
- * Calculate remaining budget
+ * Calculate average daily spending over specified number of days
  */
-export function getRemainingBudget(spent: number, budget: number): number {
+export function getAverageDailySpending(expenses: Expense[], days: number = DEFAULT_DAYS): number {
+  if (!expenses || expenses.length === 0 || days <= 0) {
+    return 0;
+  }
+
+  const dailySpending = calculateDailySpending(expenses, days);
+  const totalSpent = dailySpending.reduce((sum, day) => sum + day.amount, 0);
+  
+  return totalSpent / days;
+}
+
+/**
+ * Calculate remaining budget amount
+ */
+export function getRemainingBudget(budget: number, spent: number): number {
   return Math.max(0, budget - spent);
 }
 
 /**
- * Check if date string is in current month
+ * Calculate budget progress percentage
  */
-export function isCurrentMonth(dateString: string): boolean {
-  if (!dateString) return false;
-  
-  const date = new Date(dateString);
-  const now = new Date();
-  
-  return date.getFullYear() === now.getFullYear() && 
-         date.getMonth() === now.getMonth();
+export function getBudgetProgress(budget: number, spent: number): number {
+  if (budget <= 0) return 0;
+  return Math.min(100, (spent / budget) * 100);
 }
 
 /**
- * Get number of days in current month
+ * Filter expenses by month (YYYY-MM format)
  */
-export function getDaysInCurrentMonth(): number {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-}
-
-/**
- * Get start of current month
- */
-export function getStartOfMonth(date: Date = new Date()): Date {
-  return new Date(date.getFullYear(), date.getMonth(), 1);
-}
-
-/**
- * Format date for chart display (YYYY-MM-DD)
- */
-export function formatDateForChart(date: Date): string {
-  if (!date || isNaN(date.getTime())) {
-    return '';
+export function filterExpensesByMonth(expenses: Expense[], month?: string): Expense[] {
+  if (!expenses || expenses.length === 0) {
+    return [];
   }
-  
-  return date.toISOString().split('T')[0];
+
+  const targetMonth = month || new Date().toISOString().slice(0, 7);
+  return expenses.filter(expense => expense.date.startsWith(targetMonth));
+}
+
+/**
+ * Filter expenses by date range (inclusive)
+ */
+export function filterExpensesByDateRange(expenses: Expense[], startDate: string, endDate: string): Expense[] {
+  if (!expenses || expenses.length === 0) {
+    return [];
+  }
+
+  return expenses.filter(expense => {
+    const expenseDate = expense.date;
+    return expenseDate >= startDate && expenseDate <= endDate;
+  });
+}
+
+/**
+ * Group expenses by category
+ */
+export function groupExpensesByCategory(expenses: Expense[]): Record<Category, Expense[]> {
+  if (!expenses || expenses.length === 0) {
+    return {} as Record<Category, Expense[]>;
+  }
+
+  return expenses.reduce((groups, expense) => {
+    const category = expense.category;
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(expense);
+    return groups;
+  }, {} as Record<Category, Expense[]>);
+}
+
+/**
+ * Group expenses by date (YYYY-MM-DD format)
+ */
+export function groupExpensesByDate(expenses: Expense[]): Record<string, Expense[]> {
+  if (!expenses || expenses.length === 0) {
+    return {};
+  }
+
+  return expenses.reduce((groups, expense) => {
+    const date = expense.date;
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(expense);
+    return groups;
+  }, {} as Record<string, Expense[]>);
 }

@@ -1,0 +1,35 @@
+module ApprovalStatus {
+  @ "Approval status component for displaying expense approval state.
+  @ Shows approval progress, pending approvers, and status badges.
+  @ Provides visual indicators for approval workflow status."
+
+  type: "presentation"
+  
+  location: "src/components/ApprovalStatus.tsx"
+  
+  interface {
+    public ApprovalStatus(props: {
+      expenseId: string,
+      approvalRequest?: ApprovalRequest,
+      showDetails?: boolean,
+      compact?: boolean
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/approval-types" as {ApprovalRequest, ApprovalStatus as Status}
+    allow "../utils/formatters" as {formatDate}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep logic in parent components"
+    require pattern.status_indicators       @ "Must show clear status indicators"
+    require pattern.accessibility          @ "Must be accessible"
+    require pattern.responsive_design      @ "Must work in compact mode"
+    warn file.lines > 120                   @ "Status component getting complex"
+  }
+} 

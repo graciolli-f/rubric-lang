@@ -28,37 +28,31 @@ export interface ExpenseState {
   error: string | null;
 }
 
-// Analytics and Budget interfaces
-export interface BudgetState {
-  monthlyBudget: number;
-  currentMonthSpent: number;
-  remainingBudget: number;
-  isOverBudget: boolean;
+// Budget-related types
+export interface Budget {
+  monthlyLimit: number;
+  currentMonth: string;
 }
 
-export interface CategorySpending {
+// Analytics-related types
+export interface CategoryData {
   category: Category;
   amount: number;
   percentage: number;
+  color: string;
 }
 
-export interface DailySpending {
+export interface DailySpendingData {
   date: string;
   amount: number;
+  formattedDate: string;
 }
 
 export interface AnalyticsData {
-  categoryBreakdown: CategorySpending[];
-  dailyTrends: DailySpending[];
-  budgetData: BudgetState;
+  categoryBreakdown: CategoryData[];
+  dailySpending: DailySpendingData[];
+  totalSpent: number;
   averageDailySpending: number;
-  totalCurrentMonth: number;
-}
-
-export interface AnalyticsState {
-  data: AnalyticsData | null;
-  isLoading: boolean;
-  error: string | null;
 }
 
 // Navigation types
@@ -67,5 +61,12 @@ export type ViewMode = "expenses" | "analytics";
 // Constants for category options
 export const CATEGORIES: Category[] = ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"];
 
-// Default budget amount
-export const DEFAULT_MONTHLY_BUDGET = 2000;
+// Category colors for charts
+export const CATEGORY_COLORS: Record<Category, string> = {
+  Food: "#8884d8",
+  Transport: "#82ca9d",
+  Shopping: "#ffc658", 
+  Bills: "#ff7c7c",
+  Entertainment: "#8dd1e1",
+  Other: "#d084d0"
+};

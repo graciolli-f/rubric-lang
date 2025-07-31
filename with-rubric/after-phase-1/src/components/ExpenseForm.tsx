@@ -1,75 +1,163 @@
 import React, { useState } from 'react';
 import { useExpenseStore } from '../stores/expense-store';
-import type { ExpenseFormData } from '../types';
-import { Category } from '../types';
+import type { ExpenseFormData } from '../types/expense-types';
+import { EXPENSE_CATEGORIES } from '../types/expense-types';
+import { formatCurrency } from '../utils/formatters';
 
-export function ExpenseForm() {
-  const { addExpense } = useExpenseStore();
+export function ExpenseForm(): React.JSX.Element {
+  const { addExpense, isLoading, error, clearError } = useExpenseStore();
+
   const [formData, setFormData] = useState<ExpenseFormData>({
-    amount: 0,
-    category: Category.Other,
+    amount: '',
+    category: 'Food',
     date: new Date().toISOString().split('T')[0],
     description: ''
   });
-  const [error, setError] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [errors, setErrors] = useState<Map<string, string>>(new Map());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateForm = (): boolean => {
+    const newErrors = new Map<string, string>();
+
+    // Amount validation
+    const amount = parseFloat(formData.amount);
+    if (!formData.amount.trim()) {
+      newErrors.set('amount', 'Amount is required');
+    } else if (isNaN(amount) || amount <= 0) {
+      newErrors.set('amount', 'Amount must be a positive number');
+    } else if (amount > 999999) {
+      newErrors.set('amount', 'Amount cannot exceed $999,999');
+    }
+
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.set('description', 'Description is required');
+    } else if (formData.description.trim().length < 3) {
+      newErrors.set('description', 'Description must be at least 3 characters');
+    } else if (formData.description.trim().length > 100) {
+      newErrors.set('description', 'Description cannot exceed 100 characters');
+    }
+
+    // Date validation
+    if (!formData.date) {
+      newErrors.set('date', 'Date is required');
+    } else {
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+      
+      if (selectedDate > today) {
+        newErrors.set('date', 'Date cannot be in the future');
+      }
+    }
+
+    setErrors(newErrors);
+    return newErrors.size === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    clearError();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      addExpense(formData);
+      await addExpense(formData);
+      
+      // Reset form on success
       setFormData({
-        amount: 0,
-        category: Category.Other,
+        amount: '',
+        category: 'Food',
         date: new Date().toISOString().split('T')[0],
         description: ''
       });
+      setErrors(new Map());
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      // Error is handled by the store
+      console.error('Failed to add expense:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleChange = (field: keyof ExpenseFormData, value: string | number) => {
+  const handleInputChange = (field: keyof ExpenseFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (errors.has(field)) {
+      const newErrors = new Map(errors);
+      newErrors.delete(field);
+      setErrors(newErrors);
+    }
+    
+    // Clear global error when user makes any change
+    if (error) {
+      clearError();
+    }
   };
 
+  const getErrorForField = (field: string): string | undefined => {
+    return errors.get(field);
+  };
+
+  const previewAmount = formData.amount ? parseFloat(formData.amount) : 0;
+  const isValidAmount = !isNaN(previewAmount) && previewAmount > 0;
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-2xl font-bold mb-4 text-gray-800">Add New Expense</h2>
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">Add New Expense</h2>
       
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Amount field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Amount ($)
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
+            Amount *
           </label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={formData.amount || ''}
-            onChange={(e) => handleChange('amount', parseFloat(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+            <input
+              type="number"
+              id="amount"
+              step="0.01"
+              min="0"
+              max="999999"
+              value={formData.amount}
+              onChange={(e) => handleInputChange('amount', e.target.value)}
+              className={`w-full pl-8 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                getErrorForField('amount') ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="0.00"
+              disabled={isSubmitting || isLoading}
+            />
+          </div>
+          {isValidAmount && (
+            <p className="text-xs text-gray-500 mt-1">
+              Preview: {formatCurrency(previewAmount)}
+            </p>
+          )}
+          {getErrorForField('amount') && (
+            <p className="text-sm text-red-600 mt-1">{getErrorForField('amount')}</p>
+          )}
         </div>
 
+        {/* Category field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Category
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+            Category *
           </label>
           <select
+            id="category"
             value={formData.category}
-            onChange={(e) => handleChange('category', e.target.value as Category)}
+            onChange={(e) => handleInputChange('category', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={isSubmitting || isLoading}
           >
-            {Object.values(Category).map((category) => (
+            {EXPENSE_CATEGORIES.map((category) => (
               <option key={category} value={category}>
                 {category}
               </option>
@@ -77,40 +165,76 @@ export function ExpenseForm() {
           </select>
         </div>
 
+        {/* Date field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Date
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+            Date *
           </label>
           <input
             type="date"
+            id="date"
             value={formData.date}
-            onChange={(e) => handleChange('date', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
+            onChange={(e) => handleInputChange('date', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              getErrorForField('date') ? 'border-red-500' : 'border-gray-300'
+            }`}
+            disabled={isSubmitting || isLoading}
           />
+          {getErrorForField('date') && (
+            <p className="text-sm text-red-600 mt-1">{getErrorForField('date')}</p>
+          )}
         </div>
 
+        {/* Description field */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            Description *
           </label>
           <input
             type="text"
+            id="description"
             value={formData.description}
-            onChange={(e) => handleChange('description', e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Enter description"
-            required
+            onChange={(e) => handleInputChange('description', e.target.value)}
+            maxLength={100}
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              getErrorForField('description') ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="e.g., Lunch at restaurant"
+            disabled={isSubmitting || isLoading}
           />
+          <div className="flex justify-between mt-1">
+            <div>
+              {getErrorForField('description') && (
+                <p className="text-sm text-red-600">{getErrorForField('description')}</p>
+              )}
+            </div>
+            <p className="text-xs text-gray-500">
+              {formData.description.length}/100
+            </p>
+          </div>
         </div>
-      </div>
 
-      <button
-        type="submit"
-        className="mt-4 w-full md:w-auto bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Add Expense
-      </button>
-    </form>
+        {/* Global error display */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Submit button */}
+        <button
+          type="submit"
+          disabled={isSubmitting || isLoading}
+          className={`w-full py-2 px-4 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+            isSubmitting || isLoading
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+        >
+          {isSubmitting || isLoading ? 'Adding...' : 'Add Expense'}
+        </button>
+      </form>
+    </div>
   );
 } 

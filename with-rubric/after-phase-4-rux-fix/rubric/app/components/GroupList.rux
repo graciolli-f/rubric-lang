@@ -1,0 +1,42 @@
+module GroupList {
+  @ "Group list component for displaying user's expense groups.
+  @ Shows all groups with member counts, recent activity, and quick actions.
+  @ Provides group navigation and management interface."
+
+  type: "container"
+  
+  location: "src/components/GroupList.tsx"
+  
+  interface {
+    public GroupList(props: {
+      onGroupSelect?: (groupId: string) -> void,
+      onCreateGroup?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _selectedGroupId: string | null
+    private _isLoading: boolean
+    private _searchTerm: string
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/group-types" as {ExpenseGroup}
+    allow "./GroupCard" as {GroupCard}
+    allow "./CreateGroupDialog" as {CreateGroupDialog}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.loading_states          @ "Must handle loading states"
+    require pattern.empty_states            @ "Must handle empty group list"
+    require pattern.search_functionality    @ "Must provide group search"
+    warn file.lines > 200                   @ "Container getting complex"
+  }
+} 

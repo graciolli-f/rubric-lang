@@ -43,97 +43,28 @@ export function formatDate(date: string | Date): string {
 export function formatDateShort(date: string | Date): string {
   try {
     const dateObj = typeof date === "string" ? new Date(date) : date;
-    
-    if (!isValidDateObject(dateObj)) {
-      return "N/A";
-    }
-    
-    return dateObj.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
+    if (!isValidDateObject(dateObj)) return "N/A";
+    return dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   } catch {
     return "N/A";
   }
 }
 
 /**
- * Format date with time
- */
-export function formatDateTime(date: string | Date): string {
-  try {
-    const dateObj = typeof date === "string" ? new Date(date) : date;
-    
-    if (!isValidDateObject(dateObj)) {
-      return "Invalid Date";
-    }
-    
-    return dateObj.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "Invalid Date";
-  }
-}
-
-/**
- * Parse date string to Date object
- */
-export function parseDate(text: string): Date {
-  if (typeof text !== "string") {
-    throw new Error("Invalid date string");
-  }
-  
-  const date = new Date(text);
-  
-  if (!isValidDateObject(date)) {
-    throw new Error("Invalid date format");
-  }
-  
-  return date;
-}
-
-/**
  * Convert Date to ISO string
  */
 export function toISOString(date: Date): string {
-  if (!isValidDateObject(date)) {
-    throw new Error("Invalid date object");
-  }
-  
+  if (!isValidDateObject(date)) throw new Error("Invalid date object");
   return date.toISOString();
-}
-
-/**
- * Validate if value is a valid date
- */
-export function isValidDate(value: unknown): value is string | Date {
-  if (typeof value === "string") {
-    return !isNaN(Date.parse(value));
-  }
-  
-  if (value instanceof Date) {
-    return isValidDateObject(value);
-  }
-  
-  return false;
 }
 
 /**
  * Validate date string format
  */
 export function validateDate(date: string): boolean {
-  if (typeof date !== "string") {
-    return false;
-  }
-  
+  if (typeof date !== "string") return false;
   try {
-    const parsed = new Date(date);
-    return isValidDateObject(parsed);
+    return isValidDateObject(new Date(date));
   } catch {
     return false;
   }
@@ -143,11 +74,7 @@ export function validateDate(date: string): boolean {
  * Sort comparison function for dates
  */
 export function sortByDate(a: string, b: string): number {
-  const dateA = new Date(a);
-  const dateB = new Date(b);
-  
-  // Sort by newest first (descending)
-  return dateB.getTime() - dateA.getTime();
+  return new Date(b).getTime() - new Date(a).getTime(); // Sort by newest first
 }
 
 /**
@@ -157,15 +84,40 @@ export function isToday(date: string): boolean {
   try {
     const inputDate = new Date(date);
     const today = new Date();
-    
-    return (
-      inputDate.getFullYear() === today.getFullYear() &&
-      inputDate.getMonth() === today.getMonth() &&
-      inputDate.getDate() === today.getDate()
-    );
+    return inputDate.getFullYear() === today.getFullYear() &&
+           inputDate.getMonth() === today.getMonth() &&
+           inputDate.getDate() === today.getDate();
   } catch {
     return false;
   }
+}
+
+/**
+ * Check if date is in current month
+ */
+export function isCurrentMonth(date: string): boolean {
+  try {
+    const inputDate = new Date(date);
+    const today = new Date();
+    return inputDate.getFullYear() === today.getFullYear() &&
+           inputDate.getMonth() === today.getMonth();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get date range for analytics
+ */
+export function getDateRange(days: number): { startDate: string; endDate: string } {
+  const endDate = new Date();
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - days + 1);
+  
+  return {
+    startDate: startDate.toISOString().slice(0, 10),
+    endDate: endDate.toISOString().slice(0, 10)
+  };
 }
 
 /**

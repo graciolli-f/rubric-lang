@@ -1,5 +1,5 @@
 module BudgetProgress {
-  @ "Pure presentation component for displaying budget progress bar"
+  @ "Pure presentation component for displaying budget vs spending progress"
   @ "Props-only, no stores or external state"
 
   type: "presentation"
@@ -9,14 +9,18 @@ module BudgetProgress {
   interface {
     @ "Props interface"
     public BudgetProgress(props: {
-      budgetData: BudgetState,
+      budget: number,
+      spent: number,
+      remaining: number,
       className?: string,
       showDetails?: boolean
     }) -> JSX.Element
   }
   
   state {
-    @ "No local state needed for progress display"
+    @ "Minimal local state for UI interactions only"
+    private isExpanded: boolean
+    private showTooltip: boolean
   }
   
   imports {
@@ -24,10 +28,14 @@ module BudgetProgress {
     allow "react" as external
     
     @ "UI libraries"
+    allow "lucide-react" as external
     allow "clsx" as external
     
     @ "Type imports only"
     allow "../types/expense.types" as types
+    
+    @ "UI-specific utilities only"
+    allow "../utils/currency" as {formatCurrency}
     
     @ "No stores, services, or data access"
     deny imports ["../stores/*", "../services/*", "../data/*", "../hooks/*"]

@@ -4,31 +4,22 @@
  */
 
 import { create } from 'zustand';
-import type { 
-  Expense, 
-  ExpenseFormData, 
-  AnalyticsData, 
-  CategorySpending, 
-  DailySpending, 
-  BudgetState,
-  DEFAULT_MONTHLY_BUDGET 
-} from '../types/expense.types';
+import type { Expense, ExpenseFormData, Budget } from '../types/expense.types';
 import { toISOString } from '../utils/date';
-import * as analytics from '../utils/analytics';
 
 interface ExpenseStore {
   // State
   expenses: Expense[];
   isLoading: boolean;
   error: string | null;
-  monthlyBudget: number;
+  budget: Budget;
   
   // Actions
   addExpense: (data: ExpenseFormData) => void;
   updateExpense: (id: string, data: ExpenseFormData) => void;
   deleteExpense: (id: string) => void;
   
-  // Budget management
+  // Budget actions
   setBudget: (amount: number) => void;
   
   // UI state actions
@@ -38,13 +29,9 @@ interface ExpenseStore {
   // Computed values
   getTotalAmount: () => number;
   getExpensesSortedByDate: () => Expense[];
-  
-  // Analytics computed values
-  getAnalyticsData: () => AnalyticsData;
-  getCategoryBreakdown: () => CategorySpending[];
-  getDailyTrends: () => DailySpending[];
-  getBudgetState: () => BudgetState;
-  getAverageDailySpending: () => number;
+  getCurrentMonthSpending: () => number;
+  getRemainingBudget: () => number;
+  getBudgetProgress: () => number;
 }
 
 export const useExpenseStore = create<ExpenseStore>((set, get) => ({
@@ -52,7 +39,10 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
   expenses: [],
   isLoading: false,
   error: null,
-  monthlyBudget: 2000, // DEFAULT_MONTHLY_BUDGET
+  budget: {
+    monthlyLimit: 2000, // Default $2000
+    currentMonth: new Date().toISOString().slice(0, 7), // YYYY-MM format
+  },
   
   // Actions
   addExpense: (data: ExpenseFormData) => {
@@ -112,6 +102,23 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
     }
   },
   
+  setBudget: (amount: number) => {
+    try {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      set((state) => ({
+        budget: {
+          monthlyLimit: amount,
+          currentMonth,
+        },
+        error: null,
+      }));
+    } catch (error) {
+      set({
+        error: error instanceof Error ? error.message : 'Failed to set budget',
+      });
+    }
+  },
+  
   clearError: () => {
     set({ error: null });
   },
@@ -121,17 +128,11 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
       expenses: [],
       isLoading: false,
       error: null,
-      monthlyBudget: 2000, // DEFAULT_MONTHLY_BUDGET
+      budget: {
+        monthlyLimit: 2000,
+        currentMonth: new Date().toISOString().slice(0, 7),
+      },
     });
-  },
-
-  // Budget management
-  setBudget: (amount: number) => {
-    if (amount < 0) {
-      set({ error: 'Budget amount must be positive' });
-      return;
-    }
-    set({ monthlyBudget: amount, error: null });
   },
   
   // Computed values
@@ -147,41 +148,24 @@ export const useExpenseStore = create<ExpenseStore>((set, get) => ({
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
   },
-
-  // Analytics computed values
-  getAnalyticsData: () => {
-    const { expenses, monthlyBudget } = get();
-    const totalAmount = get().getTotalAmount();
-    
-    return {
-      categoryBreakdown: analytics.calculateCategoryBreakdown(expenses, totalAmount),
-      dailyTrends: analytics.generateDailyTrends(expenses),
-      budgetData: analytics.calculateBudgetState(expenses, monthlyBudget),
-      averageDailySpending: analytics.getAverageDailySpending(expenses),
-      totalCurrentMonth: analytics.getCurrentMonthTotal(
-        analytics.filterExpensesForCurrentMonth(expenses)
-      )
-    };
+  
+  getCurrentMonthSpending: () => {
+    const { expenses, budget } = get();
+    const currentMonth = budget.currentMonth;
+    return expenses
+      .filter((expense) => expense.date.startsWith(currentMonth))
+      .reduce((total, expense) => total + expense.amount, 0);
   },
-
-  getCategoryBreakdown: () => {
-    const { expenses } = get();
-    const totalAmount = get().getTotalAmount();
-    return analytics.calculateCategoryBreakdown(expenses, totalAmount);
+  
+  getRemainingBudget: () => {
+    const { budget } = get();
+    const spent = get().getCurrentMonthSpending();
+    return Math.max(0, budget.monthlyLimit - spent);
   },
-
-  getDailyTrends: () => {
-    const { expenses } = get();
-    return analytics.generateDailyTrends(expenses);
-  },
-
-  getBudgetState: () => {
-    const { expenses, monthlyBudget } = get();
-    return analytics.calculateBudgetState(expenses, monthlyBudget);
-  },
-
-  getAverageDailySpending: () => {
-    const { expenses } = get();
-    return analytics.getAverageDailySpending(expenses);
+  
+  getBudgetProgress: () => {
+    const { budget } = get();
+    const spent = get().getCurrentMonthSpending();
+    return Math.min(100, (spent / budget.monthlyLimit) * 100);
   },
 }));

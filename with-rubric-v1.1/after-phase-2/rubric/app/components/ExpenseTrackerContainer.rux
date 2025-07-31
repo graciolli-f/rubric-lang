@@ -16,6 +16,7 @@ module ExpenseTrackerContainer {
     private editingExpenseId: string?
     private showDeleteConfirm: string?
     private isFormValid: boolean
+    private activeView: "expenses" | "analytics"
   }
   
   imports {
@@ -26,6 +27,8 @@ module ExpenseTrackerContainer {
     @ "Can import child components for composition"
     allow "./ExpenseForm" as {ExpenseForm}
     allow "./ExpenseList" as {ExpenseList}
+    allow "./NavigationTabs" as {NavigationTabs}
+    allow "./AnalyticsPage" as {AnalyticsPage}
     
     @ "Can import from stores for data"
     allow "../stores/expense-store" as {useExpenseStore}

@@ -1,0 +1,35 @@
+module PresenceIndicator {
+  @ "Presence indicator component for showing active users in real-time.
+  @ Displays user avatars, online status, and current activity.
+  @ Provides visual feedback for collaborative editing."
+
+  type: "presentation"
+  
+  location: "src/components/PresenceIndicator.tsx"
+  
+  interface {
+    public PresenceIndicator(props: {
+      users: PresenceUser[],
+      maxVisible?: number,
+      showActivity?: boolean,
+      size?: "small" | "medium" | "large"
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/realtime-types" as {PresenceUser}
+    allow "../utils/formatters" as {formatTimeAgo}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep logic in parent components"
+    require pattern.accessibility          @ "Must be accessible with proper labels"
+    require pattern.responsive_design      @ "Must work at different sizes"
+    require pattern.overflow_handling       @ "Must handle many users gracefully"
+    warn file.lines > 100                   @ "Indicator component getting complex"
+  }
+} 

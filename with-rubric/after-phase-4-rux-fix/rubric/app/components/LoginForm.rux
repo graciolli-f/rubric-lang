@@ -1,0 +1,41 @@
+module LoginForm {
+  @ "Login form component for user authentication.
+  @ Handles user credentials input, validation, and login submission.
+  @ Provides secure login interface with proper error handling."
+
+  type: "presentation"
+  
+  location: "src/components/LoginForm.tsx"
+  
+  interface {
+    public LoginForm(props: {
+      onSuccess?: () -> void,
+      onSignupClick?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _formData: LoginCredentials
+    private _errors: Map<string, string>
+    private _isSubmitting: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/user-types" as {LoginCredentials}
+    allow "../utils/validation" as {validateEmail, validatePassword}
+    allow "../hooks/useAuth" as {useAuth}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep validation logic in utils"
+    require pattern.form_validation         @ "Must validate form inputs"
+    require pattern.loading_states          @ "Must show loading state during submission"
+    require pattern.error_display           @ "Must display validation and auth errors"
+    require pattern.accessibility          @ "Must be accessible with proper labels"
+    warn file.lines > 150                   @ "Form getting complex"
+  }
+} 

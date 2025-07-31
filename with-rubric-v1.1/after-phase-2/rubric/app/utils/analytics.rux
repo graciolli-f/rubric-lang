@@ -1,5 +1,5 @@
 module AnalyticsUtils {
-  @ "Pure utility functions for analytics calculations"
+  @ "Pure utility functions for expense analytics calculations"
   @ "No side effects, deterministic outputs"
 
   type: "utility"
@@ -7,43 +7,45 @@ module AnalyticsUtils {
   location: "src/utils/analytics.ts"
   
   interface {
-    @ "Category analysis functions"
-    public calculateCategoryBreakdown(expenses: Expense[], totalAmount: number) -> CategorySpending[]
-    public getCategoryPercentage(categoryAmount: number, totalAmount: number) -> number
-    
-    @ "Time-based analysis functions"
-    public generateDailyTrends(expenses: Expense[], days: number) -> DailySpending[]
-    public filterExpensesForCurrentMonth(expenses: Expense[]) -> Expense[]
+    @ "Analytics calculation functions"
+    public calculateCategoryBreakdown(expenses: Expense[]) -> CategoryData[]
+    public calculateDailySpending(expenses: Expense[], days: number) -> DailySpendingData[]
+    public getMonthlySpending(expenses: Expense[], month?: string) -> number
     public getAverageDailySpending(expenses: Expense[], days: number) -> number
+    public getRemainingBudget(budget: number, spent: number) -> number
+    public getBudgetProgress(budget: number, spent: number) -> number
     
-    @ "Budget calculation functions"
-    public calculateBudgetState(expenses: Expense[], monthlyBudget: number) -> BudgetState
-    public getCurrentMonthTotal(expenses: Expense[]) -> number
-    public getRemainingBudget(spent: number, budget: number) -> number
+    @ "Helper functions"
+    public filterExpensesByMonth(expenses: Expense[], month?: string) -> Expense[]
+    public filterExpensesByDateRange(expenses: Expense[], startDate: string, endDate: string) -> Expense[]
+    public groupExpensesByCategory(expenses: Expense[]) -> Record<Category, Expense[]>
+    public groupExpensesByDate(expenses: Expense[]) -> Record<string, Expense[]>
     
-    @ "Date utility functions"
-    public isCurrentMonth(dateString: string) -> boolean
-    public getDaysInCurrentMonth() -> number
-    public getStartOfMonth(date?: Date) -> Date
-    public formatDateForChart(date: Date) -> string
-    
-    @ "Helper types and constants"
-    public readonly CHART_COLORS: string[]
+    @ "Helper types"
+    public type CategoryData = { category: Category; amount: number; percentage: number }
+    public type DailySpendingData = { date: string; amount: number; formattedDate: string }
   }
   
   state {
     @ "No mutable state allowed in utilities"
-    @ "Chart configuration constants"
-    private readonly CHART_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"]
-    private readonly DAYS_TO_ANALYZE = 30
+    @ "Use module-level constants instead"
+    private readonly DEFAULT_DAYS = 30
+    private readonly CATEGORY_COLORS = { 
+      Food: "#8884d8",
+      Transport: "#82ca9d", 
+      Shopping: "#ffc658",
+      Bills: "#ff7c7c",
+      Entertainment: "#8dd1e1",
+      Other: "#d084d0"
+    }
   }
   
   imports {
     @ "Types only"
     allow "../types/expense.types" as types
     
-    @ "Date manipulation libraries"
-    allow "date-fns" as date
+    @ "Other utilities for composition"
+    allow "./date" as {isCurrentMonth, formatDate, getDateRange}
     
     @ "No framework imports"
     deny imports ["react", "vue", "@angular/*"]

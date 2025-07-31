@@ -1,0 +1,44 @@
+module ActivityFeed {
+  @ "Activity feed component for displaying real-time group activity.
+  @ Shows recent changes, approvals, and user actions in chronological order.
+  @ Provides real-time updates and activity filtering."
+
+  type: "container"
+  
+  location: "src/components/ActivityFeed.tsx"
+  
+  interface {
+    public ActivityFeed(props: {
+      groupId?: string,
+      limit?: number,
+      showFilters?: boolean
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _activities: ActivityEvent[]
+    private _isLoading: boolean
+    private _filterType: ActivityEventType | "all"
+    private _autoRefresh: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/realtime-store" as {useRealtimeStore}
+    allow "../types/realtime-types" as {ActivityEvent, ActivityEventType}
+    allow "./ActivityItem" as {ActivityItem}
+    allow "./ActivityFilters" as {ActivityFilters}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.loading_states          @ "Must handle loading states"
+    require pattern.empty_states            @ "Must handle empty activity feed"
+    require pattern.real_time_updates       @ "Must update in real-time"
+    require pattern.virtualization          @ "Must virtualize long activity lists"
+    warn file.lines > 180                   @ "Container getting complex"
+  }
+} 

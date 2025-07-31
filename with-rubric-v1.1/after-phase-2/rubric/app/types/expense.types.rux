@@ -35,55 +35,12 @@ module ExpenseTypes {
       isLoading: boolean,
       error: string?
     }
-    
-    @ "Budget state interface"
-    public interface BudgetState {
-      monthlyBudget: number,
-      currentMonthSpent: number,
-      remainingBudget: number,
-      isOverBudget: boolean
-    }
-    
-    @ "Category spending breakdown"
-    public interface CategorySpending {
-      category: Category,
-      amount: number,
-      percentage: number
-    }
-    
-    @ "Daily spending data"
-    public interface DailySpending {
-      date: string,
-      amount: number
-    }
-    
-    @ "Analytics data aggregate"
-    public interface AnalyticsData {
-      categoryBreakdown: CategorySpending[],
-      dailyTrends: DailySpending[],
-      budgetData: BudgetState,
-      averageDailySpending: number,
-      totalCurrentMonth: number
-    }
-    
-    @ "Analytics state interface"
-    public interface AnalyticsState {
-      data: AnalyticsData?,
-      isLoading: boolean,
-      error: string?
-    }
-    
-    @ "Navigation view mode"
-    public enum ViewMode = "expenses" | "analytics"
   }
   
   state {
     @ "No mutable state allowed in types"
     @ "Constants for category options"
     private readonly CATEGORIES = ["Food", "Transport", "Shopping", "Bills", "Entertainment", "Other"]
-    
-    @ "Default budget constant"
-    private readonly DEFAULT_MONTHLY_BUDGET = 2000
   }
   
   imports {

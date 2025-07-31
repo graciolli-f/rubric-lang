@@ -1,0 +1,42 @@
+module SignupForm {
+  @ "Signup form component for user registration.
+  @ Handles user registration data input, validation, and signup submission.
+  @ Provides secure registration interface with proper validation."
+
+  type: "presentation"
+  
+  location: "src/components/SignupForm.tsx"
+  
+  interface {
+    public SignupForm(props: {
+      onSuccess?: () -> void,
+      onLoginClick?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _formData: SignupData
+    private _errors: Map<string, string>
+    private _isSubmitting: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/user-types" as {SignupData}
+    allow "../utils/validation" as {validateEmail, validatePassword, validateName}
+    allow "../hooks/useAuth" as {useAuth}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep validation logic in utils"
+    require pattern.form_validation         @ "Must validate form inputs"
+    require pattern.password_confirmation   @ "Must validate password confirmation"
+    require pattern.loading_states          @ "Must show loading state during submission"
+    require pattern.error_display           @ "Must display validation and auth errors"
+    require pattern.accessibility          @ "Must be accessible with proper labels"
+    warn file.lines > 180                   @ "Form getting complex"
+  }
+} 

@@ -4,10 +4,12 @@
  */
 
 import React, { useState } from 'react';
-import type { Expense, ExpenseFormData } from '../types/expense.types';
+import type { Expense, ExpenseFormData, ViewMode } from '../types/expense.types';
 import { useExpenseStore } from '../stores/expense-store';
 import { ExpenseForm } from './ExpenseForm';
 import { ExpenseList } from './ExpenseList';
+import NavigationTabs from './NavigationTabs';
+import AnalyticsPage from './AnalyticsPage';
 
 export default function ExpenseTrackerContainer() {
   const {
@@ -22,6 +24,7 @@ export default function ExpenseTrackerContainer() {
   } = useExpenseStore();
 
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<ViewMode>('expenses');
 
   const sortedExpenses = getExpensesSortedByDate();
 
@@ -66,88 +69,112 @@ export default function ExpenseTrackerContainer() {
     clearError();
   };
 
+  const handleViewChange = (view: ViewMode) => {
+    setActiveView(view);
+    // Clear any editing state when switching views
+    setEditingExpenseId(null);
+  };
+
   return (
-    <div className="py-6">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Manage Expenses
-          </h2>
-          <p className="text-gray-600 mt-2">
-            Track and manage your daily expenses
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Expense Tracker
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Track and manage your daily expenses with powerful analytics
+            </p>
+          </div>
         </div>
+        
+        {/* Navigation */}
+        <NavigationTabs
+          activeTab={activeView}
+          onTabChange={handleViewChange}
+        />
+      </div>
 
-        {/* Error Display */}
-        {error && (
-          <div 
-            className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
-            role="alert"
-            aria-live="assertive"
-          >
-            <div className="flex items-center justify-between">
-              <div className="text-red-700">
-                <strong>Error:</strong> {error}
-              </div>
-              <button
-                onClick={handleClearError}
-                className="text-red-600 hover:text-red-800 font-medium"
-                aria-label="Dismiss error"
+      <div className="py-8">{/* Removed extra div wrapper since AnalyticsPage has its own container */}
+
+        {/* Render Analytics or Expenses View */}
+        {activeView === 'analytics' ? (
+          <AnalyticsPage />
+        ) : (
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Error Display */}
+            {error && (
+              <div 
+                className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
+                role="alert"
+                aria-live="assertive"
               >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
+                <div className="flex items-center justify-between">
+                  <div className="text-red-700">
+                    <strong>Error:</strong> {error}
+                  </div>
+                  <button
+                    onClick={handleClearError}
+                    className="text-red-600 hover:text-red-800 font-medium"
+                    aria-label="Dismiss error"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
 
-        {/* Loading State */}
-        {isLoading && (
-          <div 
-            className="text-center py-4"
-            aria-live="polite"
-            aria-label="Loading"
-          >
-            <div className="text-gray-600">Loading...</div>
-          </div>
-        )}
+            {/* Loading State */}
+            {isLoading && (
+              <div 
+                className="text-center py-4"
+                aria-live="polite"
+                aria-label="Loading"
+              >
+                <div className="text-gray-600">Loading...</div>
+              </div>
+            )}
 
-        <div className="space-y-8">
-          {/* Add Expense Form */}
-          <ExpenseForm
-            onSubmit={handleAddExpense}
-            disabled={isLoading}
-          />
-
-          {/* Edit Expense Form - Only show when editing */}
-          {editingExpenseId && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div className="space-y-8">
+              {/* Add Expense Form */}
               <ExpenseForm
-                initialData={(() => {
-                  const expense = expenses.find(e => e.id === editingExpenseId);
-                  if (!expense) return undefined;
-                  return {
-                    amount: expense.amount,
-                    category: expense.category,
-                    date: expense.date,
-                    description: expense.description,
-                  };
-                })()}
-                onSubmit={(data) => handleSaveExpense(editingExpenseId, data)}
-                onCancel={handleCancelEdit}
+                onSubmit={handleAddExpense}
                 disabled={isLoading}
               />
-            </div>
-          )}
 
-          {/* Expense List */}
-          <ExpenseList
-            expenses={sortedExpenses}
-            onEdit={handleEditExpense}
-            onDelete={handleDeleteExpense}
-            editingId={editingExpenseId}
-          />
-        </div>
+              {/* Edit Expense Form - Only show when editing */}
+              {editingExpenseId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                  <ExpenseForm
+                    initialData={(() => {
+                      const expense = expenses.find(e => e.id === editingExpenseId);
+                      if (!expense) return undefined;
+                      return {
+                        amount: expense.amount,
+                        category: expense.category,
+                        date: expense.date,
+                        description: expense.description,
+                      };
+                    })()}
+                    onSubmit={(data) => handleSaveExpense(editingExpenseId, data)}
+                    onCancel={handleCancelEdit}
+                    disabled={isLoading}
+                  />
+                </div>
+              )}
+
+              {/* Expense List */}
+              <ExpenseList
+                expenses={sortedExpenses}
+                onEdit={handleEditExpense}
+                onDelete={handleDeleteExpense}
+                editingId={editingExpenseId}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

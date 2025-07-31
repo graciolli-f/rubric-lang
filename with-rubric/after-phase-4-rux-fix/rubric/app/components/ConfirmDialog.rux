@@ -1,0 +1,34 @@
+module ConfirmDialog {
+  @ "Reusable confirmation dialog component using React Portal.
+  @ Provides accessible modal for confirming destructive actions.
+  @ Handles focus management and keyboard interactions."
+  
+  location: "src/components/ConfirmDialog.tsx"
+  
+  interface {
+    public ConfirmDialog(props: {
+      isOpen: boolean,
+      title: string,
+      message: string,
+      confirmText?: string,
+      cancelText?: string,
+      onConfirm: () -> void,
+      onCancel: () -> void,
+      variant?: "danger" | "warning" | "info"
+    }) -> JSX.Element?
+  }
+  
+  imports {
+    allow "react" as external
+    allow "react-dom" as {createPortal}
+  }
+  
+  constraints {
+    deny imports ["../stores/*", "../types/*"]    @ "Generic component, no domain deps"
+    deny pattern.fixed_positioning_in_list        @ "Use portal for proper layering"
+    require pattern.focus_trap                     @ "Must trap focus when open"
+    require pattern.escape_key_handling            @ "Must close on Escape"
+    deny io.*                                      @ "No I/O in UI components"
+    warn file.lines > 150                          @ "Keep modals simple"
+  }
+}

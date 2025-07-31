@@ -1,10 +1,10 @@
-module AnalyticsUtils {
-  @ "Pure utility functions for analytics calculations"
+module [UtilityName]Utils {
+  @ "Pure utility functions for [purpose]"
   @ "No side effects, deterministic outputs"
 
   type: "utility"
   
-  location: "src/utils/analytics.ts"
+  location: "src/utils/[utility-name].ts"
   
   interface {
     @ "Formatting functions"

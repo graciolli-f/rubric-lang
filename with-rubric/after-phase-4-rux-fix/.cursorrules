@@ -1,0 +1,26 @@
+**MANDATORY RUBRIC COMPLIANCE:** 
+Before creating ANY new file in src/, you MUST first create the corresponding .rux constraint file in rubric/app/[matching-path]/. NO EXCEPTIONS. If you create code without first creating the .rux file, you are violating the architectural law of this project.**
+
+**MANDATORY WORKFLOW:**
+1. CREATE .rux file first (using template) if one does not already exist
+2. Check each .rux files for conflicts between `allow` and `deny` 
+EXAMPLE: 
+*This is ILLEGAL because `../services/[file]` is allowed in imports but `../services/*` is denied in constraints:*
+```
+imports {
+    allow "../services/receipt-service" as {processReceiptFile}
+}
+constaints {
+    deny imports ["../services/*", "../data/*"]   @ "Use store for data operations"
+}
+```
+3. Resolve all conflicts within .rux files before continuing
+4. PLAN code to fit constraints  
+5. WRITE code following the spec
+6. RUN `node rubric/validate.js` → must show "All constraints passed!"
+7. If violations exist → fix code (not .rux files)
+8. Repeat until clean validation
+
+**If you create ANY source file without its .rux file first, you have FAILED.**
+**If you allow conflicts within .rux files, you have FAILED**
+**If you do not run `node rubric/validate.js`, you have FAILED**

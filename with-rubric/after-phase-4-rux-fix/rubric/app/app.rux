@@ -1,0 +1,29 @@
+module App {
+  @ "Root application component that provides layout and orchestration.
+  @ Coordinates main expense tracking features and provides global context.
+  @ Should remain minimal and focused on layout composition."
+  
+  location: "src/App.tsx"
+  
+  interface {
+    public App() -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "./components/ExpenseForm" as {ExpenseForm}
+    allow "./components/ExpenseList" as {ExpenseList}
+    allow "./components/Navigation" as {Navigation}
+    allow "./components/AnalyticsPage" as {AnalyticsPage}
+    allow "./components/AuthLayout" as {AuthLayout}
+    allow "./stores/auth-store" as {useAuthStore}
+    allow "./index.css" as external
+  }
+  
+  constraints {
+    deny imports ["./services/*"]   @ "No business logic in app shell"
+    deny io.*                       @ "No I/O operations in app component"
+    deny pattern.inline_styles      @ "Use CSS classes, not inline styles"
+    warn file.lines > 100           @ "Keep app component minimal"
+  }
+}

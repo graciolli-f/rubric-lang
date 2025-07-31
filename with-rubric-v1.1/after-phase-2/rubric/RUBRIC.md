@@ -71,6 +71,17 @@ Container components can import their related components. If a component's prima
 
 This is different from breaking layer boundaries (like importing services or data layers).
 
+## Common Bug Prevention Checklist
+Run through this checklist for every module:
+1. ✓ Immutability: Create new objects instead of mutating
+2. ✓ Input validation: Validate all user inputs before processing
+3. ✓ Async guards: Prevent race conditions in async operations  
+4. ✓ Dead code: Remove unused exports and functions
+5. ✓ Error handling: Implement proper error boundaries for containers
+6. ✓ Prefer CSS: Use CSS for styling/animations over JavaScript when possible
+7. ✓ Cleanup: Handle component unmounting, clear timers, remove listeners
+8. ✓ State initialization: Ensure proper initial states and handle edge cases
+
 ## Directory Structure
 ```
 src/                    # Your code

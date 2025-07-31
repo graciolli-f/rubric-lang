@@ -1,0 +1,47 @@
+module GroupDetail {
+  @ "Group detail component for displaying group information and expenses.
+  @ Shows group members, settings, expenses, and provides group management.
+  @ Coordinates group-related components and real-time updates."
+
+  type: "container"
+  
+  location: "src/components/GroupDetail.tsx"
+  
+  interface {
+    public GroupDetail(props: {
+      groupId: string,
+      onBack?: () -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    private _activeTab: "expenses" | "members" | "activity" | "settings"
+    private _isLoading: boolean
+    private _showMemberDialog: boolean
+    private _showSettingsDialog: boolean
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../stores/group-store" as {useGroupStore}
+    allow "../stores/expense-store" as {useExpenseStore}
+    allow "../stores/realtime-store" as {useRealtimeStore}
+    allow "../types/group-types" as {ExpenseGroup}
+    allow "./GroupMembers" as {GroupMembers}
+    allow "./GroupExpenseList" as {GroupExpenseList}
+    allow "./ActivityFeed" as {ActivityFeed}
+    allow "./GroupSettings" as {GroupSettings}
+    allow "./PresenceIndicator" as {PresenceIndicator}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in container components"
+    deny imports ["../services/*"]          @ "Use stores for data operations"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep business logic in stores"
+    require pattern.loading_states          @ "Must handle loading states"
+    require pattern.error_boundaries        @ "Must handle component errors"
+    require pattern.real_time_updates       @ "Must handle real-time updates"
+    warn file.lines > 250                   @ "Container getting very complex"
+  }
+} 

@@ -1,0 +1,50 @@
+module ApprovalStore {
+  @ "Zustand store for expense approval workflow and status tracking.
+  @ Manages approval requests, approval actions, and approval-related notifications.
+  @ Coordinates approval workflow between expenses and approval service."
+
+  type: "container"
+  
+  location: "src/stores/approval-store.ts"
+  
+  interface {
+    public useApprovalStore() -> {
+      approvalRequests: ApprovalRequest[],
+      pendingApprovals: ApprovalRequest[],
+      isLoading: boolean,
+      error: string | null,
+      requestApproval: (expenseId: string, amount: number) -> Promise<void>,
+      approveExpense: (requestId: string, comment?: string) -> Promise<void>,
+      rejectExpense: (requestId: string, comment: string) -> Promise<void>,
+      loadApprovalRequests: (groupId?: string) -> Promise<void>,
+      loadPendingApprovals: (userId: string) -> Promise<void>,
+      getApprovalStatus: (expenseId: string) -> ApprovalStatus | null,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    private _approvalRequests: ApprovalRequest[]
+    private _pendingApprovals: ApprovalRequest[]
+    private _isLoading: boolean
+    private _error: string | null
+  }
+  
+  imports {
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    allow "../types/approval-types" as {ApprovalRequest, ApprovalAction, ApprovalStatus}
+    allow "../services/approval-service" as {ApprovalService}
+    allow "../services/notification-service" as {NotificationService}
+  }
+  
+  constraints {
+    deny io.*                         @ "Use approval service for I/O operations"
+    deny imports ["../components/*"]  @ "Stores should not import components"
+    deny exports ["_*"]               @ "No private exports"
+    require pattern.error_handling    @ "Must handle approval errors"
+    require pattern.loading_states    @ "Must track loading states"
+    require pattern.status_tracking   @ "Must track approval status changes"
+    warn file.lines > 180             @ "Store getting complex"
+  }
+} 

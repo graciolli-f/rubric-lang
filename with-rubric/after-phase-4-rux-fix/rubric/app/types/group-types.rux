@@ -1,0 +1,63 @@
+module GroupTypes {
+  @ "Type definitions for expense groups and collaborative features.
+  @ Defines group structures, member roles, and invitation management.
+  @ Pure type definitions with no runtime dependencies."
+
+  type: "utility"
+  
+  location: "src/types/group-types.ts"
+  
+  interface {
+    public ExpenseGroup: {
+      id: string,
+      name: string,
+      description: string,
+      createdBy: string,
+      createdAt: string,
+      members: GroupMember[],
+      settings: GroupSettings
+    }
+    public GroupMember: {
+      userId: string,
+      role: "member" | "manager" | "admin",
+      joinedAt: string,
+      invitedBy: string
+    }
+    public GroupInvitation: {
+      id: string,
+      groupId: string,
+      email: string,
+      role: "member" | "manager",
+      invitedBy: string,
+      invitedAt: string,
+      status: "pending" | "accepted" | "rejected" | "expired"
+    }
+    public GroupSettings: {
+      approvalThreshold: number,
+      requireApproval: boolean,
+      allowMemberInvites: boolean
+    }
+    public GroupExpense: {
+      expenseId: string,
+      groupId: string,
+      splitType: "equal" | "custom",
+      splits: ExpenseSplit[]
+    }
+    public ExpenseSplit: {
+      userId: string,
+      amount: number,
+      percentage?: number
+    }
+  }
+  
+  imports {
+    deny imports.*  @ "Pure type definitions require no imports"
+  }
+  
+  constraints {
+    deny io.*                    @ "No I/O in type definitions"
+    deny exports ["*Service"]   @ "No service instances in types"
+    deny pattern.business_logic @ "Pure type definitions only"
+    require file.lines < 150    @ "Keep type files focused"
+  }
+} 

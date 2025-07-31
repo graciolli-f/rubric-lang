@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objective Codebase Architecture Comparison</title>
+    <style>
+        :root {
+            --color-primary: #3f4e4a;
+            --color-primary-dark: #2d3733;
+            --color-secondary: #8b9a94;
+            --color-accent: #0284c7;
+            --color-success: #059669;
+            --color-warning: #ea580c;
+            --color-error: #dc2626;
+            
+            --color-bg: #ffffff;
+            --color-bg-secondary: #f0f4f3;
+            --color-bg-code: #1a1f1e;
+            --color-surface: #ffffff;
+            --color-border: #d4e0db;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--color-surface);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--color-border);
+        }
+
+        .section h2 {
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .section h3 {
+            color: var(--color-primary-dark);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .codebase-card {
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 2px solid var(--color-border);
+        }
+
+        .codebase-card h4 {
+            color: var(--color-primary);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--color-accent);
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .pros, .cons {
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .pros {
+            background: rgba(5, 150, 105, 0.1);
+            border-left: 4px solid var(--color-success);
+        }
+
+        .cons {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 4px solid var(--color-error);
+        }
+
+        .pros h5, .cons h5 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .pros ul li, .cons ul li {
+            margin-left: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .architecture-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .architecture-table th,
+        .architecture-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .architecture-table th {
+            background: var(--color-bg-secondary);
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .architecture-table tr:hover {
+            background: var(--color-bg-secondary);
+        }
+
+        .code-sample {
+            background: var(--color-bg-code);
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            background: var(--color-accent);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .warning {
+            background: rgba(234, 88, 12, 0.1);
+            border: 1px solid var(--color-warning);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info {
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid var(--color-accent);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .neutral {
+            background: var(--color-bg-secondary);
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .chart-container {
+            background: var(--color-surface);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .bar-chart {
+            display: flex;
+            align-items: end;
+            justify-content: space-around;
+            height: 200px;
+            margin: 1rem 0;
+        }
+
+        .bar {
+            width: 80px;
+            background: var(--color-accent);
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: end;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .bar-label {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+
+        .scenario-card {
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--color-accent);
+            margin: 1rem 0;
+        }
+
+        .scenario-card h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .tradeoff-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .tradeoff-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--color-border);
+        }
+
+        .tradeoff-card.best {
+            background: rgba(5, 150, 105, 0.1);
+            border-color: var(--color-success);
+        }
+
+        .tradeoff-card.balanced {
+            background: rgba(2, 132, 199, 0.1);
+            border-color: var(--color-accent);
+        }
+
+        .tradeoff-card.risky {
+            background: rgba(234, 88, 12, 0.1);
+            border-color: var(--color-warning);
+        }
+
+        .roadmap-item {
+            background: var(--color-surface);
+            border-left: 4px solid var(--color-secondary);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .roadmap-item h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .roadmap-priority {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .priority-high {
+            background: var(--color-error);
+            color: white;
+        }
+
+        .priority-medium {
+            background: var(--color-warning);
+            color: white;
+        }
+
+        .priority-low {
+            background: var(--color-secondary);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Objective Codebase Architecture Comparison</h1>
+        <p>Balanced Analysis of Base-LLM, Best-Practices, and With-Rubric Approaches</p>
+    </div>
+
+    <div class="container">
+        <div class="neutral">
+            <h2 style="color: var(--color-primary); border: none; margin-bottom: 1rem;">Executive Summary</h2>
+            <p>This report provides an objective comparison of three development approaches for building an expense tracker application. Each approach represents different philosophies: rapid development (Base-LLM), structured development (Best-Practices), and constraint-driven development (With-Rubric). The goal is to understand the tradeoffs, not advocate for any particular approach.</p>
+        </div>
+
+        <div class="section">
+            <h2>Raw Metrics Comparison</h2>
+            
+            <div class="chart-container">
+                <h3>Lines of Code (First 20 Files)</h3>
+                <div class="bar-chart">
+                    <div>
+                        <div class="bar" style="height: 100%;">3,455</div>
+                        <div class="bar-label">Base-LLM</div>
+                    </div>
+                    <div>
+                        <div class="bar" style="height: 101%;">3,484</div>
+                        <div class="bar-label">Best-Practices</div>
+                    </div>
+                    <div>
+                        <div class="bar" style="height: 78%;">2,708</div>
+                        <div class="bar-label">With-Rubric</div>
+                    </div>
+                </div>
+                <p style="color: var(--color-text-secondary); font-size: 0.9rem;">Note: Smaller codebases aren't automatically better - they may lack features or have different architectural trade-offs.</p>
+            </div>
+
+            <table class="architecture-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Base-LLM</th>
+                        <th>Best-Practices</th>
+                        <th>With-Rubric</th>
+                        <th>Interpretation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Total Files</td>
+                        <td>30</td>
+                        <td>33</td>
+                        <td>30</td>
+                        <td>Similar complexity</td>
+                    </tr>
+                    <tr>
+                        <td>Lines of Code</td>
+                        <td>3,455</td>
+                        <td>3,484</td>
+                        <td>2,708</td>
+                        <td>22% reduction could indicate better separation OR missing features</td>
+                    </tr>
+                    <tr>
+                        <td>Dependencies</td>
+                        <td>4</td>
+                        <td>6</td>
+                        <td>5</td>
+                        <td>More deps = more features OR more complexity</td>
+                    </tr>
+                    <tr>
+                        <td>Largest Component</td>
+                        <td>332 lines</td>
+                        <td>424 lines</td>
+                        <td>224 lines</td>
+                        <td>Smaller components = better separation OR over-fragmentation</td>
+                    </tr>
+                    <tr>
+                        <td>Documentation Lines</td>
+                        <td>220 (comprehensive)</td>
+                        <td>171 (architectural)</td>
+                        <td>446 (constraints)</td>
+                        <td>Different documentation philosophies</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Honest Tradeoff Analysis</h2>
+
+            <div class="comparison-grid">
+                <div class="codebase-card">
+                    <h4>Base-LLM Approach</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Genuine Strengths</h5>
+                            <ul>
+                                <li>Fastest time-to-market</li>
+                                <li>Feature-complete from start</li>
+                                <li>Excellent user-facing documentation</li>
+                                <li>Low barrier to contribution</li>
+                                <li>Familiar patterns for most developers</li>
+                                <li>Works well for prototypes/MVPs</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Real Weaknesses</h5>
+                            <ul>
+                                <li>Technical debt accumulates quickly</li>
+                                <li>Difficult to maintain as team grows</li>
+                                <li>Architecture tends to degrade over time</li>
+                                <li>Hard to enforce standards across developers</li>
+                                <li>Refactoring becomes increasingly costly</li>
+                                <li>Testing becomes more difficult</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-card">
+                    <h4>Best-Practices Approach</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Genuine Strengths</h5>
+                            <ul>
+                                <li>Industry-standard patterns</li>
+                                <li>Good balance of structure and flexibility</li>
+                                <li>Clear architectural documentation</li>
+                                <li>Easier onboarding for experienced developers</li>
+                                <li>Service layer provides good abstraction</li>
+                                <li>Scalable to medium-sized teams</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Real Weaknesses</h5>
+                            <ul>
+                                <li>No enforcement mechanism for guidelines</li>
+                                <li>Still prone to architectural drift</li>
+                                <li>Requires disciplined team members</li>
+                                <li>Documentation can become outdated</li>
+                                <li>Inconsistent application across modules</li>
+                                <li>Relies on code review vigilance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-card">
+                    <h4>With-Rubric Approach</h4>
+                    <div class="pros-cons">
+                        <div class="pros">
+                            <h5>Genuine Strengths</h5>
+                            <ul>
+                                <li>Enforced architectural integrity</li>
+                                <li>Consistent patterns across team</li>
+                                <li>Smaller, more focused components</li>
+                                <li>Automated constraint validation</li>
+                                <li>Prevents common architectural mistakes</li>
+                                <li>Self-documenting architecture</li>
+                            </ul>
+                        </div>
+                        <div class="cons">
+                            <h5>Real Weaknesses</h5>
+                            <ul>
+                                <li>Steep learning curve for teams</li>
+                                <li>Can slow initial development velocity</li>
+                                <li>May be overkill for small projects</li>
+                                <li>Constraint conflicts can be frustrating</li>
+                                <li>Limited ecosystem and tooling support</li>
+                                <li>Risk of over-engineering simple solutions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Situational Appropriateness</h2>
+
+            <h3>When Each Approach Makes Most Sense</h3>
+
+            <div class="scenario-card">
+                <h4>Base-LLM Excels In:</h4>
+                <ul>
+                    <li><strong>Prototypes and MVPs:</strong> When speed to market is critical and long-term maintainability is secondary</li>
+                    <li><strong>Solo developer projects:</strong> No coordination overhead, developer knows the entire codebase</li>
+                    <li><strong>Short-lived projects:</strong> Less than 6 months with no ongoing maintenance</li>
+                    <li><strong>Proof of concepts:</strong> Exploring feasibility before committing to architecture</li>
+                    <li><strong>Hackathons/competitions:</strong> Maximum features in minimum time</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <h4>Best-Practices Excels In:</h4>
+                <ul>
+                    <li><strong>Medium-sized teams (3-8 developers):</strong> Enough structure without over-constraint</li>
+                    <li><strong>Experienced teams:</strong> Developers familiar with clean architecture principles</li>
+                    <li><strong>Progressive enhancement:</strong> Gradually improving existing codebases</li>
+                    <li><strong>Consultancy work:</strong> Delivering to clients who want "standard" architecture</li>
+                    <li><strong>Educational projects:</strong> Teaching clean architecture concepts</li>
+                </ul>
+            </div>
+
+            <div class="scenario-card">
+                <h4>With-Rubric Excels In:</h4>
+                <ul>
+                    <li><strong>Large teams (8+ developers):</strong> Coordination benefits outweigh constraint overhead</li>
+                    <li><strong>Long-term projects (2+ years):</strong> Architectural integrity pays off over time</li>
+                    <li><strong>High-stakes applications:</strong> Where bugs are expensive and consistency is critical</li>
+                    <li><strong>Teams with mixed experience:</strong> Constraints help junior developers avoid pitfalls</li>
+                    <li><strong>Regulatory/compliance environments:</strong> Auditable architectural decisions</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Development Velocity Analysis</h2>
+
+            <div class="tradeoff-grid">
+                <div class="tradeoff-card best">
+                    <h4>Week 1-4 (Initial Development)</h4>
+                    <p><strong>Winner: Base-LLM</strong></p>
+                    <p>Fastest feature delivery, minimal setup overhead, immediate productivity.</p>
+                </div>
+                <div class="tradeoff-card balanced">
+                    <h4>Month 2-6 (Feature Growth)</h4>
+                    <p><strong>Balanced: Best-Practices</strong></p>
+                    <p>Good structure emerges, some refactoring needed, steady velocity.</p>
+                </div>
+                <div class="tradeoff-card best">
+                    <h4>Year 1+ (Maintenance Phase)</h4>
+                    <p><strong>Winner: With-Rubric</strong></p>
+                    <p>Constraints prevent architectural decay, consistent velocity over time.</p>
+                </div>
+            </div>
+
+            <div class="warning">
+                <h4>Velocity Reality Check</h4>
+                <p>These patterns assume teams follow the constraints. In practice, deadline pressure often leads to shortcuts that undermine the intended benefits of structured approaches.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Critical Limitations</h2>
+
+            <h3>Where Each Approach Falls Short</h3>
+
+            <div class="comparison-grid">
+                <div class="warning">
+                    <h4>Base-LLM Failure Modes</h4>
+                    <ul>
+                        <li>Becomes unmaintainable after ~6 months</li>
+                        <li>Adding new developers slows everyone down</li>
+                        <li>Feature requests take increasingly longer</li>
+                        <li>Bug fixes introduce new bugs</li>
+                        <li>Testing coverage becomes inadequate</li>
+                    </ul>
+                </div>
+
+                <div class="warning">
+                    <h4>Best-Practices Failure Modes</h4>
+                    <ul>
+                        <li>Guidelines ignored under pressure</li>
+                        <li>Inconsistent application across modules</li>
+                        <li>Architecture documentation becomes stale</li>
+                        <li>New team members may not follow patterns</li>
+                        <li>No automated enforcement of standards</li>
+                    </ul>
+                </div>
+
+                <div class="warning">
+                    <h4>With-Rubric Failure Modes</h4>
+                    <ul>
+                        <li>Team rebels against perceived over-engineering</li>
+                        <li>Constraint conflicts cause development bottlenecks</li>
+                        <li>Validation failures frustrate developers</li>
+                        <li>May inhibit creative problem-solving</li>
+                        <li>Limited community support for troubleshooting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Rubric Development Roadmap</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">Areas where the rubric approach needs significant improvement to become more widely adopted:</p>
+
+            <div class="roadmap-item">
+                <h4>Developer Experience Improvements <span class="roadmap-priority priority-high">High Priority</span></h4>
+                <ul>
+                    <li><strong>Better Error Messages:</strong> Current validation errors are cryptic; need clear explanations and suggested fixes</li>
+                    <li><strong>IDE Integration:</strong> Real-time constraint validation in editors, auto-completion for .rux files</li>
+                    <li><strong>Debugging Tools:</strong> Visual constraint dependency graphs, conflict resolution assistants</li>
+                    <li><strong>Learning Resources:</strong> Interactive tutorials, constraint pattern libraries, best practices guides</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-item">
+                <h4>Constraint System Flexibility <span class="roadmap-priority priority-high">High Priority</span></h4>
+                <ul>
+                    <li><strong>Conditional Constraints:</strong> Environment-specific rules (dev vs. prod), feature flag support</li>
+                    <li><strong>Gradual Adoption:</strong> Ability to introduce constraints incrementally without breaking existing code</li>
+                    <li><strong>Escape Hatches:</strong> Controlled ways to bypass constraints for legitimate edge cases</li>
+                    <li><strong>Dynamic Constraints:</strong> Runtime constraint evaluation, contextual rule application</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-item">
+                <h4>Tooling and Ecosystem <span class="roadmap-priority priority-medium">Medium Priority</span></h4>
+                <ul>
+                    <li><strong>CI/CD Integration:</strong> Seamless integration with existing linting and build pipelines</li>
+                    <li><strong>Metrics and Analytics:</strong> Constraint violation tracking, architectural drift detection</li>
+                    <li><strong>Team Collaboration:</strong> Shared constraint libraries, team-specific constraint sets</li>
+                    <li><strong>Framework Integration:</strong> Native support for React, Vue, Angular patterns</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-item">
+                <h4>Performance and Scalability <span class="roadmap-priority priority-medium">Medium Priority</span></h4>
+                <ul>
+                    <li><strong>Validation Performance:</strong> Current validator is slow on large codebases (577 lines for validation logic)</li>
+                    <li><strong>Incremental Validation:</strong> Only re-validate changed files and their dependencies</li>
+                    <li><strong>Parallel Processing:</strong> Multi-threaded validation for large projects</li>
+                    <li><strong>Caching Strategies:</strong> Cache validation results to speed up repeated runs</li>
+                </ul>
+            </div>
+
+            <div class="roadmap-item">
+                <h4>Community and Standardization <span class="roadmap-priority priority-low">Lower Priority</span></h4>
+                <ul>
+                    <li><strong>Community Adoption:</strong> Need more real-world usage and feedback before standardization</li>
+                    <li><strong>Constraint Pattern Library:</strong> Common architectural patterns as reusable constraint sets</li>
+                    <li><strong>Industry Integration:</strong> Support from major development tools and platforms</li>
+                    <li><strong>Academic Validation:</strong> Research on effectiveness in large-scale development</li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <h4>Current State Assessment</h4>
+                <p>The rubric approach shows promise but is still experimental. The 577-line validation script and manual .rux file creation indicate it's not yet ready for mainstream adoption. It needs significant tooling investment and community validation before it can compete with established approaches.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Objective Recommendations</h2>
+
+            <h3>Decision Framework</h3>
+            <table class="architecture-table">
+                <thead>
+                    <tr>
+                        <th>Project Characteristics</th>
+                        <th>Recommended Approach</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Solo developer, &lt;3 months, prototype</td>
+                        <td>Base-LLM</td>
+                        <td>Speed is paramount, maintenance burden is minimal</td>
+                    </tr>
+                    <tr>
+                        <td>Small team (2-5), 6-18 months, product</td>
+                        <td>Best-Practices</td>
+                        <td>Good balance of structure and velocity</td>
+                    </tr>
+                    <tr>
+                        <td>Large team (8+), 2+ years, mission-critical</td>
+                        <td>With-Rubric (if team buy-in exists)</td>
+                        <td>Coordination benefits outweigh constraint overhead</td>
+                    </tr>
+                    <tr>
+                        <td>Medium team, high turnover, compliance needs</td>
+                        <td>Best-Practices + selective constraints</td>
+                        <td>Documentation + some enforcement without full rigidity</td>
+                    </tr>
+                    <tr>
+                        <td>Research/experimental project</td>
+                        <td>Base-LLM initially, evolve as needed</td>
+                        <td>Premature optimization of unknown requirements</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="neutral">
+                <h3>Balanced Conclusion</h3>
+                <p>No single approach is universally superior. The choice depends on team size, project timeline, maintenance requirements, and team culture. The data shows each approach optimizes for different priorities:</p>
+                <ul style="margin-top: 1rem;">
+                    <li><strong>Base-LLM optimizes for speed:</strong> Fastest feature delivery but highest long-term cost</li>
+                    <li><strong>Best-Practices optimizes for balance:</strong> Reasonable structure without excessive constraints</li>
+                    <li><strong>With-Rubric optimizes for consistency:</strong> Highest upfront cost but most predictable long-term maintenance</li>
+                </ul>
+                <p style="margin-top: 1rem;">The key is matching the approach to your specific context rather than applying one-size-fits-all solutions.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

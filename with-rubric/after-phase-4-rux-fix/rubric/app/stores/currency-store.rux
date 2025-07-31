@@ -1,0 +1,50 @@
+module CurrencyStore {
+  @ "Manages user currency preferences and exchange rates"
+  @ "Zustand store for currency settings and exchange rate caching"
+  
+  location: "src/stores/currency-store.ts"
+  
+  interface {
+    @ "Currency store API"
+    public useCurrencyStore() -> {
+      preferredCurrency: Currency,
+      exchangeRates: ExchangeRates?,
+      isLoading: boolean,
+      error: string?,
+      setPreferredCurrency: (currency: Currency) -> Promise<void>,
+      refreshExchangeRates: () -> Promise<void>,
+      clearError: () -> void
+    }
+  }
+  
+  state {
+    @ "Store state"
+    private _preferredCurrency: Currency
+    private _exchangeRates: ExchangeRates?
+    private _isLoading: boolean
+    private _error: string?
+  }
+  
+  imports {
+    @ "External packages"
+    allow "zustand" as external
+    allow "zustand/middleware" as external
+    
+    @ "Internal types and services"
+    allow "../types/expense-types" as {Currency, ExchangeRates}
+    allow "../services/currency-service" as {fetchExchangeRates, getCachedRates}
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    allow io.localStorage["currency-preferences"]  @ "Can store currency preferences"
+    deny io.console.*  @ "No console logging"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "File constraints"
+    warn file.lines > 120  @ "Getting large, consider splitting"
+    deny file.lines > 150  @ "Too large, must split"
+  }
+} 

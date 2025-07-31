@@ -1,0 +1,35 @@
+module ActivityItem {
+  @ "Activity item component for displaying individual activity events.
+  @ Shows activity details, user actions, and timestamps with proper formatting.
+  @ Provides compact and detailed views for different contexts."
+
+  type: "presentation"
+  
+  location: "src/components/ActivityItem.tsx"
+  
+  interface {
+    public ActivityItem(props: {
+      activity: ActivityEvent,
+      compact?: boolean,
+      showUser?: boolean,
+      onClick?: () -> void
+    }) -> JSX.Element
+  }
+  
+  imports {
+    allow "react" as external
+    allow "../types/realtime-types" as {ActivityEvent, ActivityEventType}
+    allow "../utils/formatters" as {formatTimeAgo, formatActivityMessage}
+  }
+  
+  constraints {
+    deny io.*                                @ "No I/O in presentation components"
+    deny imports ["../services/*", "../stores/*"] @ "Receive data via props"
+    deny exports ["_*"]                     @ "No private exports"
+    deny pattern.inline_business_logic      @ "Keep logic in parent components"
+    require pattern.accessibility          @ "Must be accessible"
+    require pattern.responsive_design      @ "Must work in compact mode"
+    require pattern.activity_icons          @ "Must show appropriate activity icons"
+    warn file.lines > 100                   @ "Item component getting complex"
+  }
+} 

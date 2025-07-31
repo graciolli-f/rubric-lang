@@ -1,0 +1,64 @@
+module RealtimeTypes {
+  @ "Type definitions for real-time collaboration and activity tracking.
+  @ Defines presence, activity events, and WebSocket message structures.
+  @ Pure type definitions with no runtime dependencies."
+
+  type: "utility"
+  
+  location: "src/types/realtime-types.ts"
+  
+  interface {
+    public PresenceUser: {
+      userId: string,
+      name: string,
+      lastSeen: string,
+      isActive: boolean,
+      currentView: string
+    }
+    public ActivityEvent: {
+      id: string,
+      type: ActivityEventType,
+      userId: string,
+      userName: string,
+      timestamp: string,
+      data: any,
+      groupId?: string
+    }
+    public ActivityEventType: "expense_created" | "expense_updated" | "expense_deleted" | 
+                              "approval_requested" | "approval_granted" | "approval_rejected" |
+                              "group_created" | "member_added" | "member_removed"
+    public WebSocketMessage: {
+      type: MessageType,
+      payload: any,
+      timestamp: string,
+      userId?: string
+    }
+    public MessageType: "presence_update" | "activity_event" | "expense_update" | 
+                        "approval_update" | "group_update" | "user_typing" | "ping" | "pong"
+    public OptimisticUpdate: {
+      id: string,
+      type: "expense" | "approval" | "group",
+      operation: "create" | "update" | "delete",
+      data: any,
+      timestamp: string,
+      status: "pending" | "confirmed" | "failed"
+    }
+    public ConflictResolution: {
+      localVersion: any,
+      serverVersion: any,
+      resolvedVersion: any,
+      strategy: "server_wins" | "client_wins" | "merge" | "manual"
+    }
+  }
+  
+  imports {
+    deny imports.*  @ "Pure type definitions require no imports"
+  }
+  
+  constraints {
+    deny io.*                    @ "No I/O in type definitions"
+    deny exports ["*Service"]   @ "No service instances in types"
+    deny pattern.business_logic @ "Pure type definitions only"
+    require file.lines < 120    @ "Keep type files focused"
+  }
+} 

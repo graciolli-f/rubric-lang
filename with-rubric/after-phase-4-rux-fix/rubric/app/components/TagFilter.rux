@@ -1,0 +1,42 @@
+module TagFilter {
+  @ "Tag filtering dropdown component"
+  @ "Multi-select dropdown for filtering expenses by tags"
+  
+  location: "src/components/TagFilter.tsx"
+  
+  interface {
+    @ "Tag filter component"
+    public TagFilter(props: {
+      availableTags: string[],
+      selectedTags: string[],
+      onTagsChange: (tags: string[]) -> void
+    }) -> JSX.Element
+  }
+  
+  state {
+    @ "Component state"
+    private _isOpen: boolean
+  }
+  
+  imports {
+    @ "External packages"
+    allow "react" as external
+  }
+  
+  constraints {
+    @ "I/O Operations"
+    deny io.console.*  @ "No console logging"
+    deny io.network.*  @ "No API calls"
+    deny io.localStorage.*  @ "No localStorage access"
+    
+    @ "Export restrictions"
+    deny exports ["_*"]  @ "No private members"
+    
+    @ "Pattern requirements"
+    require pattern.escape_key  @ "Must handle escape key"
+    
+    @ "File constraints"
+    warn file.lines > 120  @ "Getting large, consider splitting"
+    deny file.lines > 140  @ "Too large, must split"
+  }
+} 

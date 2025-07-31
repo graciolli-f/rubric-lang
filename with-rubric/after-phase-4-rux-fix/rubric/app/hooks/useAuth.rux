@@ -1,0 +1,33 @@
+module UseAuth {
+  @ "Custom hook for authentication operations.
+  @ Abstracts authentication business logic from components.
+  @ Provides async operations for login, signup, and logout."
+
+  type: "utility"
+  
+  location: "src/hooks/useAuth.ts"
+  
+  interface {
+    public useAuth() -> {
+      handleLogin: (credentials: LoginCredentials) -> Promise<void>,
+      handleSignup: (data: SignupData) -> Promise<void>,
+      handleLogout: () -> Promise<void>,
+      isLoading: boolean,
+      error: string | null,
+      clearError: () -> void
+    }
+  }
+  
+  imports {
+    allow "../stores/auth-store" as {useAuthStore}
+    allow "../types/user-types" as {LoginCredentials, SignupData}
+  }
+  
+  constraints {
+    deny io.*                           @ "No I/O in hooks"
+    deny exports ["_*"]                 @ "No private exports"
+    allow pattern.async_operations      @ "Hooks can handle async operations"
+    allow pattern.error_handling        @ "Hooks should handle errors"
+    warn file.lines > 50                @ "Keep hooks focused and small"
+  }
+} 

@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codebase Evolution Analysis: Phase-by-Phase Progression</title>
+    <style>
+        :root {
+            --color-primary: #3f4e4a;
+            --color-primary-dark: #2d3733;
+            --color-secondary: #8b9a94;
+            --color-accent: #0284c7;
+            --color-success: #059669;
+            --color-warning: #ea580c;
+            --color-error: #dc2626;
+            
+            --color-bg: #ffffff;
+            --color-bg-secondary: #f0f4f3;
+            --color-bg-code: #1a1f1e;
+            --color-surface: #ffffff;
+            --color-border: #d4e0db;
+            --color-text: #111827;
+            --color-text-secondary: #6b7280;
+            --color-text-muted: #9ca3af;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--color-text);
+            background-color: var(--color-bg);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--color-surface);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--color-border);
+        }
+
+        .section h2 {
+            color: var(--color-primary);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .section h3 {
+            color: var(--color-primary-dark);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .phase-timeline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .phase-card {
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--color-accent);
+            position: relative;
+        }
+
+        .phase-card.phase-1 { border-left-color: #10b981; }
+        .phase-card.phase-2 { border-left-color: #0284c7; }
+        .phase-card.phase-3 { border-left-color: #ea580c; }
+        .phase-card.phase-4 { border-left-color: #dc2626; }
+
+        .phase-number {
+            position: absolute;
+            top: -10px;
+            right: 15px;
+            background: var(--color-accent);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .phase-card h4 {
+            color: var(--color-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 0.5rem 0;
+        }
+
+        .feature-list li {
+            padding: 0.25rem 0;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+
+        .feature-list li:before {
+            content: "→ ";
+            color: var(--color-accent);
+            font-weight: bold;
+        }
+
+        .codebase-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .codebase-column {
+            background: var(--color-surface);
+            border-radius: 8px;
+            border: 2px solid var(--color-border);
+            overflow: hidden;
+        }
+
+        .codebase-header {
+            padding: 1rem;
+            font-weight: 600;
+            text-align: center;
+            color: white;
+        }
+
+        .codebase-base-llm .codebase-header { background: #dc2626; }
+        .codebase-best-practices .codebase-header { background: #0284c7; }
+        .codebase-with-rubric .codebase-header { background: #059669; }
+
+        .phase-evolution {
+            padding: 1rem;
+        }
+
+        .phase-block {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            border-radius: 6px;
+            background: var(--color-bg-secondary);
+        }
+
+        .phase-block h5 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .metrics-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+            font-size: 0.85rem;
+        }
+
+        .metric-good { color: var(--color-success); }
+        .metric-warning { color: var(--color-warning); }
+        .metric-bad { color: var(--color-error); }
+
+        .architecture-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        .architecture-table th,
+        .architecture-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+            font-size: 0.9rem;
+        }
+
+        .architecture-table th {
+            background: var(--color-bg-secondary);
+            color: var(--color-primary);
+            font-weight: 600;
+        }
+
+        .debt-indicator {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .debt-low { background: rgba(5, 150, 105, 0.2); color: var(--color-success); }
+        .debt-medium { background: rgba(234, 88, 12, 0.2); color: var(--color-warning); }
+        .debt-high { background: rgba(220, 38, 38, 0.2); color: var(--color-error); }
+
+        .insight-box {
+            background: rgba(2, 132, 199, 0.1);
+            border: 1px solid var(--color-accent);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box {
+            background: rgba(234, 88, 12, 0.1);
+            border: 1px solid var(--color-warning);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .success-box {
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid var(--color-success);
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .constraint-impact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .impact-positive {
+            background: rgba(5, 150, 105, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-success);
+        }
+
+        .impact-negative {
+            background: rgba(220, 38, 38, 0.1);
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-error);
+        }
+
+        .progression-chart {
+            height: 300px;
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-line {
+            position: absolute;
+            height: 3px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .line-base-llm { 
+            background: linear-gradient(90deg, #dc2626, #fca5a5);
+            top: 50px;
+            width: 85%;
+        }
+
+        .line-best-practices { 
+            background: linear-gradient(90deg, #0284c7, #7dd3fc);
+            top: 120px;
+            width: 75%;
+        }
+
+        .line-with-rubric { 
+            background: linear-gradient(90deg, #059669, #86efac);
+            top: 190px;
+            width: 90%;
+        }
+
+        .chart-labels {
+            position: absolute;
+            bottom: 20px;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+        }
+
+        .legend {
+            position: absolute;
+            top: 20px;
+            right: 2rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0.25rem 0;
+            font-size: 0.8rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            margin-right: 0.5rem;
+            border-radius: 2px;
+        }
+
+        .code-sample {
+            background: var(--color-bg-code);
+            color: #e5e7eb;
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .bug-timeline {
+            background: var(--color-bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .bug-item {
+            display: flex;
+            align-items: start;
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid var(--color-error);
+        }
+
+        .bug-phase {
+            background: var(--color-error);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 1rem;
+            min-width: 60px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Codebase Evolution Analysis</h1>
+        <p>Phase-by-Phase Progression: How Architecture and Constraints Shape Development</p>
+    </div>
+
+    <div class="container">
+        <div class="insight-box">
+            <h2 style="color: var(--color-primary); border: none; margin-bottom: 1rem;">Executive Summary</h2>
+            <p>This report analyzes how three different architectural approaches—Base-LLM (unconstrained), Best-Practices (guidelines), and With-Rubric (enforced constraints)—evolved through four development phases of an expense tracker application. The focus is on understanding how clean architecture principles and constraints influence feature implementation, bug introduction, and long-term maintainability.</p>
+        </div>
+
+        <div class="section">
+            <h2>Development Phases Overview</h2>
+            <div class="phase-timeline">
+                <div class="phase-card phase-1">
+                    <div class="phase-number">1</div>
+                    <h4>Foundation Phase</h4>
+                    <p><strong>Goal:</strong> Basic expense tracker</p>
+                    <ul class="feature-list">
+                        <li>Add/Edit/Delete expenses</li>
+                        <li>Category selection</li>
+                        <li>Running totals</li>
+                        <li>Basic form validation</li>
+                    </ul>
+                </div>
+
+                <div class="phase-card phase-2">
+                    <div class="phase-number">2</div>
+                    <h4>Analytics Phase</h4>
+                    <p><strong>Goal:</strong> Data visualization & insights</p>
+                    <ul class="feature-list">
+                        <li>Budget setting and tracking</li>
+                        <li>Charts and graphs</li>
+                        <li>Category breakdown</li>
+                        <li>Data persistence</li>
+                    </ul>
+                </div>
+
+                <div class="phase-card phase-3">
+                    <div class="phase-number">3</div>
+                    <h4>Advanced Features Phase</h4>
+                    <p><strong>Goal:</strong> Enterprise functionality</p>
+                    <ul class="feature-list">
+                        <li>Receipt management</li>
+                        <li>Multi-currency support</li>
+                        <li>Recurring expenses</li>
+                        <li>Export functionality</li>
+                        <li>Tags and filtering</li>
+                    </ul>
+                </div>
+
+                <div class="phase-card phase-4">
+                    <div class="phase-number">4</div>
+                    <h4>Collaboration Phase</h4>
+                    <p><strong>Goal:</strong> Multi-user capabilities</p>
+                    <ul class="feature-list">
+                        <li>User authentication</li>
+                        <li>Expense groups</li>
+                        <li>Approval workflows</li>
+                        <li>Real-time collaboration</li>
+                        <li>Role-based permissions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Architecture Evolution Comparison</h2>
+            
+            <div class="codebase-comparison">
+                <div class="codebase-column codebase-base-llm">
+                    <div class="codebase-header">Base-LLM (Unconstrained)</div>
+                    <div class="phase-evolution">
+                        <div class="phase-block">
+                            <h5>Phase 1: Fast Start</h5>
+                            <div class="metrics-row">
+                                <span>Lines of Code:</span>
+                                <span class="metric-good">502 lines</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Architecture:</span>
+                                <span class="metric-warning">Mixed concerns</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-medium">Medium</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                No persistence, business logic scattered across components, but features delivered quickly.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 2: Store Explosion</h5>
+                            <div class="metrics-row">
+                                <span>Lines of Code:</span>
+                                <span class="metric-warning">1,000+ lines</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Store Size:</span>
+                                <span class="metric-bad">150+ lines (240% growth)</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-high">High</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                All analytics logic dumped into store. 289-line Analytics component created. No service layer.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 3: Architectural Decay</h5>
+                            <div class="metrics-row">
+                                <span>Component Violations:</span>
+                                <span class="metric-bad">Multiple over-sized</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Coupling:</span>
+                                <span class="metric-bad">Tightly coupled</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-high">Critical</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Features become harder to add. Changes require touching multiple files.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 4: Crisis Mode</h5>
+                            <div class="metrics-row">
+                                <span>Code Duplication:</span>
+                                <span class="metric-bad">Significant</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Refactoring Cost:</span>
+                                <span class="metric-bad">Very High</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-high">Unsustainable</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Duplicate auth logic, WebSocket scattered everywhere. Architecture beyond repair.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-column codebase-best-practices">
+                    <div class="codebase-header">Best-Practices (Guidelines)</div>
+                    <div class="phase-evolution">
+                        <div class="phase-block">
+                            <h5>Phase 1: Proper Foundation</h5>
+                            <div class="metrics-row">
+                                <span>Lines of Code:</span>
+                                <span class="metric-warning">1,089 lines (117% more)</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Layer Separation:</span>
+                                <span class="metric-good">4 layers implemented</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-low">Low</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Clean architecture from start. Proper persistence. One component over size limit (328 lines).
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 2: Guidelines Strain</h5>
+                            <div class="metrics-row">
+                                <span>Service Layer:</span>
+                                <span class="metric-good">Analytics service added</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Component Size:</span>
+                                <span class="metric-warning">Still over limit</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-medium">Medium</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Good service separation, but guideline violations persist. No enforcement mechanism.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 3: Gradual Drift</h5>
+                            <div class="metrics-row">
+                                <span>Architecture:</span>
+                                <span class="metric-warning">Some boundaries blur</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Consistency:</span>
+                                <span class="metric-warning">Varies by module</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-medium">Medium</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                New features follow patterns inconsistently. Documentation helps but doesn't enforce.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 4: Pressure Points</h5>
+                            <div class="metrics-row">
+                                <span>Guideline Adherence:</span>
+                                <span class="metric-warning">Inconsistent</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Code Review Load:</span>
+                                <span class="metric-bad">High</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-medium">Medium</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Complex features stress guidelines. Relies heavily on team discipline and reviews.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-column codebase-with-rubric">
+                    <div class="codebase-header">With-Rubric (Constraints)</div>
+                    <div class="phase-evolution">
+                        <div class="phase-block">
+                            <h5>Phase 1: Constrained Start</h5>
+                            <div class="metrics-row">
+                                <span>Lines of Code:</span>
+                                <span class="metric-good">Clean and focused</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Constraint Violations:</span>
+                                <span class="metric-good">Zero</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-low">Very Low</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Pre-existing .rux files enforced clean patterns. No architectural violations possible.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 2: Constraint-First</h5>
+                            <div class="metrics-row">
+                                <span>Development Flow:</span>
+                                <span class="metric-good">Constraints → Code</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Store Splitting:</span>
+                                <span class="metric-good">Automatic (200 line limit)</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-low">Very Low</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                7 new .rux files created before code. Size limits forced proper separation.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 3: Enforced Quality</h5>
+                            <div class="metrics-row">
+                                <span>Feature Addition:</span>
+                                <span class="metric-good">Consistent patterns</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Architecture Drift:</span>
+                                <span class="metric-good">Prevented</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-low">Low</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Complex features (currency, receipts) added with consistent architecture. No compromises.
+                            </p>
+                        </div>
+
+                        <div class="phase-block">
+                            <h5>Phase 4: Sustained Architecture</h5>
+                            <div class="metrics-row">
+                                <span>Code Quality:</span>
+                                <span class="metric-good">Consistent</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Validation:</span>
+                                <span class="metric-good">All constraints pass</span>
+                            </div>
+                            <div class="metrics-row">
+                                <span>Technical Debt:</span>
+                                <span class="debt-indicator debt-low">Low</span>
+                            </div>
+                            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--color-text-secondary);">
+                                Even with complex collaboration features, architecture remains clean and predictable.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Technical Debt Accumulation Timeline</h2>
+            
+            <div class="progression-chart">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #dc2626, #fca5a5);"></div>
+                        <span>Base-LLM</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #0284c7, #7dd3fc);"></div>
+                        <span>Best-Practices</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(90deg, #059669, #86efac);"></div>
+                        <span>With-Rubric</span>
+                    </div>
+                </div>
+                
+                <div class="chart-line line-base-llm"></div>
+                <div class="chart-line line-best-practices"></div>
+                <div class="chart-line line-with-rubric"></div>
+                
+                <div class="chart-labels">
+                    <span>Phase 1</span>
+                    <span>Phase 2</span>
+                    <span>Phase 3</span>
+                    <span>Phase 4</span>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <h4>Key Pattern: Diverging Trajectories</h4>
+                <p>The data shows a clear divergence in technical debt accumulation. Base-LLM starts fast but debt grows exponentially. Best-Practices maintains medium debt levels but can't prevent gradual drift. With-Rubric shows consistent low debt due to enforced constraints.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Bug Introduction and Architectural Failure Points</h2>
+
+            <div class="bug-timeline">
+                <h3>Base-LLM Bug Timeline</h3>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 1</div>
+                    <div>
+                        <strong>Data Loss Bug:</strong> <span class="debt-indicator debt-high">Critical</span> No persistence implementation - all data lost on refresh. Business logic scattered makes persistence retrofitting difficult.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 2</div>
+                    <div>
+                        <strong>God Object Store:</strong> <span class="debt-indicator debt-medium">Major</span> Store grows to 150+ lines with mixed concerns. Analytics calculations incorrectly placed in state management layer.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 3</div>
+                    <div>
+                        <strong>Component Explosion:</strong> <span class="debt-indicator debt-medium">Major</span> Components exceed reasonable size limits. Currency conversion logic embedded in UI components instead of services.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 4</div>
+                    <div>
+                        <strong>Duplication Crisis:</strong> <span class="debt-indicator debt-medium">Major</span> Authentication logic duplicated across components. WebSocket handling scattered throughout UI layer.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bug-timeline">
+                <h3>Best-Practices Bug Timeline</h3>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 1</div>
+                    <div>
+                        <strong>Component Size Violation:</strong> <span class="debt-indicator debt-low">Minor</span> ExpenseList component reaches 328 lines, violating 200-line guideline. Shows guidelines are suggestions, not enforced constraints.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 2</div>
+                    <div>
+                        <strong>Guideline Drift:</strong> <span class="debt-indicator debt-low">Minor</span> Same size violations persist. Architecture solid but inconsistent application of guidelines under pressure.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 3</div>
+                    <div>
+                        <strong>Business Logic Leakage:</strong> <span class="debt-indicator debt-low">Minor</span> Date formatting and display logic still present in UI components instead of services.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 4</div>
+                    <div>
+                        <strong>Memory Leak in WebSocket:</strong> <span class="debt-indicator debt-high">Critical</span> Heartbeat interval never cleared on disconnect.
+                        <br><strong>Race Conditions:</strong> <span class="debt-indicator debt-medium">Major</span> Real-time updates lack conflict resolution or version checking.
+                        <br><strong>Currency Precision Loss:</strong> <span class="debt-indicator debt-medium">Major</span> Multiple currency conversions cause rounding errors.
+                        <br><strong>Data Integrity Issues:</strong> <span class="debt-indicator debt-medium">Major</span> No validation for negative amounts, future dates, or duplicate detection.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bug-timeline">
+                <h3>With-Rubric Bug Timeline</h3>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 1</div>
+                    <div>
+                        <strong>No Violations:</strong> <span class="debt-indicator debt-low">None</span> Pre-existing .rux constraints successfully prevented architectural issues. Clean implementation from start.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 2</div>
+                    <div>
+                        <strong>Store Size Violation (Caught):</strong> <span class="debt-indicator debt-low">Minor</span> Expense store exceeded 200-line limit, immediately caught by validation and properly fixed by splitting into separate analytics store.
+                        <br><strong>Validation Tool Violations:</strong> <span class="debt-indicator debt-low">Minor</span> AI dismissed validator violations as "infrastructure" rather than fixing them, showing semantic workaround of constraints.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 3</div>
+                    <div>
+                        <strong>Process Violation:</strong> <span class="debt-indicator debt-low">Minor</span> Created .rux files after writing code instead of constraints-first approach. Went against established rubric workflow.
+                    </div>
+                </div>
+                <div class="bug-item">
+                    <div class="bug-phase">Phase 4</div>
+                    <div>
+                        <strong>Validation Ignored:</strong> <span class="debt-indicator debt-low">Minor</span> Some validation failures rationalized away rather than fixed. Demonstrates human tendency to work around constraints under pressure.
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <h4>Bug Pattern Analysis</h4>
+                <p><strong>Base-LLM:</strong> Critical bugs from architectural failures (data loss, god objects, duplication). Severity escalates with each phase.</p>
+                <p><strong>Best-Practices:</strong> Minor guideline violations early, but critical bugs emerge in complex features (memory leaks, race conditions). Shows guidelines can't prevent all issues.</p>
+                <p><strong>With-Rubric:</strong> Only minor process violations, no critical architectural bugs. Constraints successfully prevent serious issues but require discipline to follow.</p>
+            </div>
+
+            <div class="constraint-impact">
+                <div class="impact-negative">
+                    <h4>Architectural Failures Without Constraints</h4>
+                    <ul>
+                        <li><strong>No Persistence Planning:</strong> Core requirement missed due to focus on UI</li>
+                        <li><strong>Business Logic Leakage:</strong> Calculations end up in wrong layers</li>
+                        <li><strong>Component Size Explosion:</strong> No limits lead to 289+ line components</li>
+                        <li><strong>Tight Coupling:</strong> Every component directly imports store</li>
+                        <li><strong>Code Duplication:</strong> Similar logic re-implemented in multiple places</li>
+                    </ul>
+                </div>
+                <div class="impact-positive">
+                    <h4>Constraint Benefits in Practice</h4>
+                    <ul>
+                        <li><strong>Automatic Splitting:</strong> 200-line limit forces proper separation</li>
+                        <li><strong>Layer Enforcement:</strong> Business logic can't leak into UI</li>
+                        <li><strong>Dependency Control:</strong> Import restrictions prevent tight coupling</li>
+                        <li><strong>Consistency:</strong> All modules follow same patterns</li>
+                        <li><strong>Debt Prevention:</strong> Violations caught before accumulation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Feature Implementation Analysis</h2>
+
+            <table class="architecture-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Base-LLM Implementation</th>
+                        <th>Best-Practices Implementation</th>
+                        <th>With-Rubric Implementation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Analytics (Phase 2)</strong></td>
+                        <td>289-line component, all logic in store, no services</td>
+                        <td>Proper service layer, but 328-line component violation</td>
+                        <td>7 new .rux files first, then modular implementation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Multi-Currency (Phase 3)</strong></td>
+                        <td>Conversion logic scattered across UI components</td>
+                        <td>Currency service created, some business logic still in UI</td>
+                        <td>Dedicated currency service with type-safe constraints</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Receipt Management (Phase 3)</strong></td>
+                        <td>Base64 handling mixed with UI logic</td>
+                        <td>Separate receipt service but validation in components</td>
+                        <td>Clean separation: service for processing, UI for display</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Real-time Collaboration (Phase 4)</strong></td>
+                        <td>WebSocket logic spread across multiple components</td>
+                        <td>WebSocket service exists but UI coupling remains</td>
+                        <td>Strict layer boundaries prevent WebSocket leakage</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Authentication (Phase 4)</strong></td>
+                        <td>Auth state duplicated in multiple components</td>
+                        <td>Central auth service but inconsistent usage</td>
+                        <td>Single auth module with enforced access patterns</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h4>Implementation Velocity vs. Quality Trade-off</h4>
+                <p><strong>Week 1-4:</strong> Base-LLM delivers features fastest, With-Rubric slowest due to constraint setup</p>
+                <p><strong>Month 2-6:</strong> Best-Practices finds good rhythm, Base-LLM starts slowing due to complexity</p>
+                <p><strong>Month 6+:</strong> With-Rubric maintains steady velocity, Base-LLM requires major refactoring</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>The Role of Clean Architecture Constraints</h2>
+
+            <div class="codebase-comparison">
+                <div class="codebase-column">
+                    <div style="background: #dc2626; color: white; padding: 1rem; text-align: center; font-weight: 600;">
+                        Unconstrained Development
+                    </div>
+                    <div style="padding: 1rem;">
+                        <h4>Typical Evolution Pattern</h4>
+                        <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+                            <li><strong>Phase 1:</strong> Fast feature delivery, architectural shortcuts</li>
+                            <li><strong>Phase 2:</strong> Technical debt begins accumulating</li>
+                            <li><strong>Phase 3:</strong> Adding features becomes increasingly difficult</li>
+                            <li><strong>Phase 4:</strong> Architecture collapse, major refactoring needed</li>
+                        </ol>
+                        
+                        <div class="warning-box">
+                            <strong>Key Insight:</strong> Without constraints, every feature addition is a local optimization that often leads to global architectural problems.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-column">
+                    <div style="background: #0284c7; color: white; padding: 1rem; text-align: center; font-weight: 600;">
+                        Guideline-Based Development
+                    </div>
+                    <div style="padding: 1rem;">
+                        <h4>Documented Best Practices</h4>
+                        <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+                            <li><strong>Phase 1:</strong> Good initial structure, over-engineering concerns</li>
+                            <li><strong>Phase 2:</strong> Guidelines help but aren't enforced</li>
+                            <li><strong>Phase 3:</strong> Inconsistent application under pressure</li>
+                            <li><strong>Phase 4:</strong> Relies on code review and team discipline</li>
+                        </ol>
+                        
+                        <div class="insight-box">
+                            <strong>Key Insight:</strong> Guidelines are suggestions that work well with experienced, disciplined teams but can be ignored under deadline pressure.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="codebase-column">
+                    <div style="background: #059669; color: white; padding: 1rem; text-align: center; font-weight: 600;">
+                        Constraint-Driven Development
+                    </div>
+                    <div style="padding: 1rem;">
+                        <h4>Enforced Architectural Rules</h4>
+                        <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+                            <li><strong>Phase 1:</strong> Slower start due to constraint setup</li>
+                            <li><strong>Phase 2:</strong> Constraints force proper architecture</li>
+                            <li><strong>Phase 3:</strong> Complex features still follow patterns</li>
+                            <li><strong>Phase 4:</strong> Sustained architectural integrity</li>
+                        </ol>
+                        
+                        <div class="success-box">
+                            <strong>Key Insight:</strong> Constraints create initial friction but prevent architectural decay, leading to sustained development velocity.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Critical Insights and Recommendations</h2>
+
+            <h3>The Constraint Paradox</h3>
+            <div class="insight-box">
+                <p>The data reveals a fundamental paradox: constraints that slow initial development actually accelerate long-term velocity by preventing architectural decay. This suggests that architectural constraints should be evaluated based on project lifecycle, not just initial development speed.</p>
+            </div>
+
+            <h3>Phase-Specific Patterns</h3>
+            <table class="architecture-table">
+                <thead>
+                    <tr>
+                        <th>Development Phase</th>
+                        <th>Best Approach</th>
+                        <th>Why</th>
+                        <th>Key Metric</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prototype/MVP (1-3 months)</td>
+                        <td>Base-LLM</td>
+                        <td>Speed to market is paramount</td>
+                        <td>Time to first deployment</td>
+                    </tr>
+                    <tr>
+                        <td>Feature Development (3-6 months)</td>
+                        <td>Best-Practices</td>
+                        <td>Good balance of structure and velocity</td>
+                        <td>Features per sprint</td>
+                    </tr>
+                    <tr>
+                        <td>Scaling Phase (6-18 months)</td>
+                        <td>With-Rubric</td>
+                        <td>Constraints prevent decay under complexity</td>
+                        <td>Velocity sustainability</td>
+                    </tr>
+                    <tr>
+                        <td>Maintenance (18+ months)</td>
+                        <td>With-Rubric</td>
+                        <td>Enforced consistency across team changes</td>
+                        <td>Bug introduction rate</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <h4>The 6-Month Inflection Point</h4>
+                <p>Data shows that around month 6, Base-LLM projects hit an inflection point where adding features becomes significantly more expensive than the initial implementation. This coincides with when critical bugs emerge in Best-Practices codebases. With-Rubric maintains consistent quality throughout.</p>
+            </div>
+
+            <h3>Bug Severity Distribution Analysis</h3>
+            <table class="architecture-table">
+                <thead>
+                    <tr>
+                        <th>Approach</th>
+                        <th>Critical Bugs</th>
+                        <th>Major Bugs</th>
+                        <th>Minor Issues</th>
+                        <th>Total Bugs</th>
+                        <th>Pattern</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Base-LLM</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>Escalating severity</td>
+                    </tr>
+                    <tr>
+                        <td>Best-Practices</td>
+                        <td>1</td>
+                        <td>3</td>
+                        <td>3</td>
+                        <td>7</td>
+                        <td>Early minor, late critical</td>
+                    </tr>
+                    <tr>
+                        <td>With-Rubric</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>4</td>
+                        <td>4</td>
+                        <td>Process violations only</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Team Size and Constraint Effectiveness</h3>
+            <div class="constraint-impact">
+                <div style="background: var(--color-bg-secondary); padding: 1rem; border-radius: 6px;">
+                    <h4>Solo Developer (1 person)</h4>
+                    <ul>
+                        <li>Base-LLM often sufficient for small projects</li>
+                        <li>Developer knows entire codebase</li>
+                        <li>Can refactor easily when needed</li>
+                    </ul>
+                </div>
+                <div style="background: var(--color-bg-secondary); padding: 1rem; border-radius: 6px;">
+                    <h4>Small Team (2-5 people)</h4>
+                    <ul>
+                        <li>Best-Practices provide good coordination</li>
+                        <li>Code reviews can catch violations</li>
+                        <li>Shared understanding manageable</li>
+                    </ul>
+                </div>
+                <div style="background: var(--color-bg-secondary); padding: 1rem; border-radius: 6px;">
+                    <h4>Large Team (8+ people)</h4>
+                    <ul>
+                        <li>With-Rubric becomes essential</li>
+                        <li>Coordination costs justify constraint overhead</li>
+                        <li>Prevents inconsistent interpretations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="success-box">
+                <h4>Final Recommendation: Bug Prevention Strategy</h4>
+                <p>Choose your architectural approach based on your project's expected lifecycle and team dynamics, not just current requirements. The bug analysis reveals that Base-LLM produces critical architectural bugs, Best-Practices can't prevent complex feature bugs despite guidelines, and With-Rubric prevents serious bugs entirely through constraints.</p>
+                <p><strong>Key insight:</strong> The constraint overhead that seems expensive today prevents the critical bugs that could kill your project tomorrow. A single memory leak or race condition can cost more to fix than implementing proper constraints from the start.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

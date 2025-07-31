@@ -1,0 +1,44 @@
+module ApprovalService {
+  @ "Approval workflow service for expense approval management.
+  @ Handles approval request creation, processing, and status updates.
+  @ Provides approval workflow logic with proper permission validation."
+
+  type: "service"
+  
+  location: "src/services/approval-service.ts"
+  
+  interface {
+    public createApprovalRequest(expenseId: string, amount: number, groupId?: string) -> Promise<ApprovalRequest>
+    public approveExpense(requestId: string, approverId: string, comment?: string) -> Promise<ApprovalAction>
+    public rejectExpense(requestId: string, approverId: string, comment: string) -> Promise<ApprovalAction>
+    public getApprovalRequests(groupId?: string) -> Promise<ApprovalRequest[]>
+    public getPendingApprovals(userId: string) -> Promise<ApprovalRequest[]>
+    public getApprovalStatus(expenseId: string) -> Promise<ApprovalRequest | null>
+    public canApprove(userId: string, requestId: string) -> Promise<boolean>
+    public getRequiredApprovers(amount: number, groupId?: string) -> Promise<User[]>
+    public isApprovalRequired(amount: number, groupId?: string) -> boolean
+  }
+  
+  state {
+    private _approvalRules: Map<string, ApprovalRule>
+    private _pendingRequests: Map<string, ApprovalRequest>
+  }
+  
+  imports {
+    allow "../types/approval-types" as {ApprovalRequest, ApprovalAction, ApprovalRule, ApprovalStatus}
+    allow "../types/user-types" as {User}
+    allow "../utils/permissions" as {canApproveExpense, getApprovalThreshold}
+    allow "./notification-service" as {NotificationService}
+  }
+  
+  constraints {
+    allow io.network.fetch["/api/approvals/*"]  @ "Can make approval API calls"
+    deny io.localStorage.*                      @ "Use stores for caching"
+    deny io.console.*                           @ "No console logging"
+    deny exports ["_*"]                         @ "No private exports"
+    require pattern.permission_checks           @ "Must validate approval permissions"
+    require pattern.error_handling              @ "Must handle approval errors"
+    require pattern.workflow_validation         @ "Must validate approval workflow"
+    warn file.lines > 250                       @ "Consider splitting approval logic"
+  }
+} 

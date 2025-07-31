@@ -25,18 +25,7 @@ module ExpenseStore {
       
       @ "Computed values"
       getTotalAmount: () -> number,
-      getExpensesSortedByDate: () -> Expense[],
-      
-      @ "Budget management"
-      monthlyBudget: number,
-      setBudget: (amount: number) -> void,
-      
-      @ "Analytics computed values"
-      getAnalyticsData: () -> AnalyticsData,
-      getCategoryBreakdown: () -> CategorySpending[],
-      getDailyTrends: () -> DailySpending[],
-      getBudgetState: () -> BudgetState,
-      getAverageDailySpending: () -> number
+      getExpensesSortedByDate: () -> Expense[]
     }
   }
   
@@ -45,7 +34,6 @@ module ExpenseStore {
     private _expenses: Expense[]
     private _isLoading: boolean
     private _error: string?
-    private _monthlyBudget: number
   }
   
   imports {
@@ -57,9 +45,6 @@ module ExpenseStore {
     
     @ "Utilities for ID generation and date handling"
     allow "../utils/date" as {toISOString}
-    
-    @ "Analytics utilities for computed values"
-    allow "../utils/analytics" as analytics
     
     @ "No services since no backend yet"
     deny imports ["../services/*"]
